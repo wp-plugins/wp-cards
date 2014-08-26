@@ -1,6 +1,6 @@
 === Plugin Name ===
 Contributors: rocketwood
-Tags: cards, card design, widgets
+Tags: cards, card design, widgets, widget, sidebar
 Requires at least: 3.2
 Tested up to: 3.5.1
 Stable tag: 1.0
