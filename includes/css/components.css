@@ -105,7 +105,7 @@
 	text-shadow: 0 1px 1px rgba(0,0,0,.4);
 }
 
-.banner-jumbotron {
+.banner-jumbotron, .cover-image {
 	margin: 0 -15px;
 	background-repeat: no-repeat;
 	background-position: center center;
@@ -412,6 +412,14 @@
 	font-size: 21px;
 	font-weight: 200;
 	line-height: 30px;
+}
+
+.featurette.entry-thumb {
+	float:right;
+}
+
+.featurette.entry-thumb:nth-child(odd) {
+	float:left;
 }
 
 /*
