@@ -3,14 +3,14 @@
 Plugin Name: WP Cards
 Plugin URI: http://davidscotttufts.com/wp-cards/
 Description: Allows for theme developers to add "cards" to their theme's homepage and header
-Version: 1.0
+Version: 1.1
 Author: David S. Tufts
 Author URI: http://davidscotttufts.com/
 Text Domain: card design
 License: GPL2
 */
 
-/*	Copyright 2011	David S. Tufts	(email : david.tufts@rocketwood.com)
+/*	Copyright 2014	David S. Tufts	(email : david.tufts@rocketwood.com)
 
 		This program is free software; you can redistribute it and/or modify
 		it under the terms of the GNU General Public License, version 2, as
@@ -28,11 +28,14 @@ License: GPL2
 
 // Global plugin settings
 $wp_cards_query_stack = array();
+$view = 'list';
+$valid_views = array( 'list' => 'List', 'grid' => 'Grid', 'tile' => 'Tile', 'mini' => 'Mini', 'spotlight' => 'Spotlight', 'banner' => 'Banner', 'featurette' => 'Featurette' );
+		
 add_action( 'plugins_loaded', 'wp_cards_load_textdomain' );
 add_action( 'widgets_init', 'wp_cards_widgets_register');
 
 define( 'WPCARDSPATH', dirname( __FILE__ ) );
-define( 'REQUEST_URI', $_SERVER['REQUEST_URI'] );
+require_once(WPCARDSPATH.'/wp-cards-excerpt.php');
 
 /** Run activation when the plugin is activated */
 register_activation_hook(__FILE__, 'wp_cards_activation');
@@ -120,10 +123,10 @@ function wp_cards_query($query) {
 	$wp_cards_query_stack[] =& $GLOBALS['wp_query'];
 
 	// nullify global query object pointer
-	unset($GLOBALS['wp_query']);
+	unset( $GLOBALS['wp_query'] );
 
 	// assign global pointer to new query object
-	$GLOBALS['wp_query'] =& new WP_Query();
+	$GLOBALS['wp_query'] = new WP_Query();
 
 	// initialize new global query state
 	$results = $GLOBALS['wp_query']->query($query);
@@ -152,6 +155,21 @@ function wp_cards_reset_query() {
 	wp_reset_postdata();
 }
 
+function wp_cards_set_view( $new_view = '' ) {
+	global $view;
+	$view = $new_view;
+	return $view;
+}
+
+function wp_cards_get_view() {
+	global $view, $valid_views;
+	if ( ! empty ( $_REQUEST['view'] ) && in_array( $_REQUEST['view'], $valid_views ) ) {
+		return $_REQUEST['view'];
+	} else {
+		return $view;
+	}
+}
+
 function wp_cards_boolean( $value = null, $default = false ) {
 	// Ensure that the default is a boolean value
 	if ( ! is_bool( $default ) )
@@ -176,6 +194,280 @@ function wp_cards_boolean( $value = null, $default = false ) {
 	}
 
 	return $default;
+}
+
+function wp_cards_toolbar() {
+	
+}
+
+function wp_cards_load_more( $args = array() ) {
+	global $wp_query;
+	
+	if ( ! ( $wp_query->max_num_pages > 1 ) ) return;
+
+	$page = get_query_var( 'paged' );
+	$page = ! empty( $page ) ? intval( $page ) : 1;
+	$posts_per_page = intval( get_query_var( 'posts_per_page' ) );
+
+	$default_args = array(
+		'path'                   => '',
+		'post_type'              => null,
+		'max_num_pages'          => intval( ceil( $wp_query->found_posts / $posts_per_page ) ),
+		'offset_by_id'           => null,
+		'found_posts'            => $wp_query->found_posts,
+		'target'                 => 'content'
+	);
+	
+	$args = array_merge( $default_args, $args );
+	extract( $args );
+
+	$filter_pairs = wp_cards_filter_pairs();
+	$max_num_pages = ( $posts_per_page != -1 ? ceil($found_posts / $posts_per_page) : 1 );
+
+	if ( $max_num_pages > 1 && $page < $max_num_pages ) {
+		$filter_pairs['page'] = ($page + 1);
+
+		$query_string = wp_cards_query_string( $args, $filter_pairs, $path, (empty($path) ? true : false) );
+
+		$html = sprintf( '
+			<div class="load-more-toolbar">
+				<a href="%1$s" rel="%2$s" class="%3$s" title="%4$s">%4$s</a>
+			</div>',
+			$query_string,
+			$target,
+			! empty ($class) ? $class : 'ajax-append',
+			__('Load More', 'wp-cards')
+		);
+
+		add_action( 'wp_footer', 'wp_cards_ajax_footer' );
+
+		echo $html;
+	}
+}
+
+function wp_cards_filter_pairs() {
+	global $wp_query;
+	$filter_pairs = array();
+
+	if ( $year = $wp_query->query_vars['year'] )
+		$filter_pairs['year'] = $year;
+
+	if ( $month = $wp_query->query_vars['monthnum'] )
+		$filter_pairs['monthnum'] = $month;
+	elseif ( isset($wp_query->query_vars['month']) )
+		$filter_pairs['monthnum'] = $wp_query->query_vars['month'];
+
+	if ( $day = $wp_query->query_vars['day'] )
+		$filter_pairs['day'] = $day;
+
+	if ( ! empty($_GET['s']) )
+		$filter_pairs['search'] = esc_attr($_GET['s']);
+	elseif ( $search = $wp_query->query_vars['s'] )
+		$filter_pairs['search'] = $search;
+	elseif ( isset($wp_query->query_vars['search']) )
+		$filter_pairs['search'] = $wp_query->query_vars['search'];
+
+	if ( isset($wp_query->query_vars['category']) )
+		$filter_pairs['category'] = $wp_query->query_vars['category'];
+	elseif ( isset($wp_query->query_vars['category_name']) )
+		$filter_pairs['category'] = $wp_query->query_vars['category_name'];
+
+	if ( $tag = $wp_query->query_vars['tag'] )
+		$filter_pairs['tag'] = $tag;
+
+	return $filter_pairs;
+}
+
+function wp_cards_query_string( $args = array(), $filter_pairs = array(), $path = '', $base = true ) {
+	global $wp_query;
+	$query_params = '';
+
+	if ( $base ) {
+		if ( ! empty( $args['id'] ) ) {
+			$path = get_permalink( $args['id'] );
+		}
+
+		if ( '' == $path ) {
+			// Figure out the current page
+			if ( get_query_var('paged') )
+				$cur_page = get_query_var('paged');
+			elseif ( get_query_var('page') )
+				$cur_page = get_query_var('page');
+			else
+				$cur_page = 1;
+
+			if ( isset( $filter_pairs['page'] ) )
+				$page = $filter_pairs['page'];
+			else
+				$page = 1;
+
+			if ( ! ( ($cur_page == $page) && ( $page > 1 ) ) )
+				$path = esc_url(get_pagenum_link($page));
+			elseif ( ! empty($args['post_type']) )
+				$path = '/'.$args['post_type'].'/';
+			else
+				$path = '/';
+		}
+	}
+
+	// Get the ?query=string
+	if ( $path_split = explode('?', $path) ) {
+		$path = $path_split[0];
+		if ( isset($path_split[1]) ) {
+			$query_params = $path_split[1];
+		}
+	}
+
+	if ( ! empty( $args['view'] ) ) {
+		$query_params .= ( trim($query_params) != '' ? '&' : '' );
+		$query_params .= 'view=' . $args['view'];
+	}
+	
+	if ( trim($query_params) != '' ) {
+		$path . '?' . $query_params;
+	}
+		
+	return $path;
+}
+
+function wp_cards_ajax_footer() {
+	$src = plugins_url( 'includes/js/wp-cards-ajax.js', __FILE__ );
+
+	wp_register_script( 'ajax-reload', $src );
+	wp_enqueue_script( 'ajax-reload' );
+}
+
+function wp_cards_loop( $args = array() ) {
+	return wp_cards_get_loop( $args, true );
+}
+
+function wp_cards_get_loop( $args = array(), $load = false ) {
+	$default_args = array(
+		'post_type' => '',
+		'view'      => ''
+	);
+
+	$args = wp_parse_args( $args, $default_args );
+	extract( $args );
+
+	$post_type = 'any' == $post_type ? null : $post_type;
+	$template_names = array();
+
+	if ( ! empty( $post_type ) ) {
+		if ( ! empty( $view ) ) {
+			$template_names[] = 'loop-' . $post_type . '-' . $view . '.php';
+			$template_names[] = 'loop-' . $post_type . '.php';
+			$template_names[] = 'loop-' . $view . '.php';
+		} else {
+			$template_names[] = 'loop-' . $post_type . '.php';
+		}
+	} elseif ( ! empty( $view ) ) {
+		$template_names[] = 'loop-' . $view . '.php';
+	}
+
+	$template_names[] = 'loop.php';
+
+	return wp_cards_locate_template( $template_names, $load, false );
+}
+
+function wp_cards_excerpt( $args = array() ) {
+	return wp_cards_get_excerpt( $args, true );
+}
+
+function wp_cards_get_excerpt( $args = array(), $load = false ) {
+	// File name order: 1. post_type - 2. view - 3. post_format
+	$default_args = array(
+		'post_type' => '',
+		'view' => '',
+		'post_format' => ''
+	);
+
+	$args = wp_parse_args( $args, $default_args );
+
+	extract( $args );
+
+	$post_type = 'any' == $post_type ? null : $post_type;
+
+	$template_names = array();
+
+	if ( ! empty( $post_type ) ) {
+		if ( ! empty( $view ) ) {
+			if ( ! empty( $post_format ) ) {
+				$template_names[] = 'excerpt-' . $post_type . '-' . $view . '-' . $post_format . '.php';
+				$template_names[] = 'excerpt-' . $post_type . '-' . $view . '.php';
+				$template_names[] = 'excerpt-' . $post_type . '-' . $post_format . '.php';
+				$template_names[] = 'excerpt-' . $post_type . '.php';
+				$template_names[] = 'excerpt-' . $view . '-' . $post_format . '.php';
+				$template_names[] = 'excerpt-' . $view . '.php';
+				$template_names[] = 'excerpt-' . $post_format . '.php';
+			} else {
+				$template_names[] = 'excerpt-' . $post_type . '-' . $view . '.php';
+				$template_names[] = 'excerpt-' . $post_type . '.php';
+				$template_names[] = 'excerpt-' . $view . '.php';
+			}
+		} elseif ( ! empty( $post_format ) ) {
+			$template_names[] = 'excerpt-' . $post_type . '-' . $post_format . '.php';
+			$template_names[] = 'excerpt-' . $post_type . '.php';
+			$template_names[] = 'excerpt-' . $post_format . '.php';
+		} else {
+			$template_names[] = 'excerpt-' . $post_type . '.php';
+		}
+	} elseif ( ! empty( $view ) ) {
+		if ( ! empty( $post_format ) ) {
+			$template_names[] = 'excerpt-' . $view . '-' . $post_format . '.php';
+			$template_names[] = 'excerpt-' . $view . '.php';
+			$template_names[] = 'excerpt-' . $post_format . '.php';
+		} else {
+			$template_names[] = 'excerpt-' . $view . '.php';
+		}
+	} elseif ( ! empty( $post_format ) ) {
+		$template_names[] = 'excerpt-' . $post_format . '.php';
+	}
+
+	$template_names[] = 'excerpt.php';
+
+	return wp_cards_locate_template( $template_names, $load, false );
+}
+
+function wp_cards_locate_template( $template_names, $load = false, $require_once = true ) {
+	$wp_cards_path = plugin_dir_path( __FILE__ ) . 'templates/';
+	$template_path = get_stylesheet_directory() . '/';
+	$stylesheet_path = get_template_directory() . '/';
+	$template_file = '';
+
+	foreach ( (array) $template_names as $template_name ) {
+		if ( empty( $template_name ) ) continue;
+
+		if ( file_exists( $stylesheet_path . $template_name ) ) {
+			$template_file = $stylesheet_path . $template_name;
+			break;
+		}
+
+		if ( file_exists( $template_path . $template_name ) ) {
+			$template_file = $template_path . $template_name;
+			break;
+		}
+
+		if ( file_exists( $wp_cards_path . $template_name ) ) {
+			$template_file = $wp_cards_path . $template_name;
+			break;
+		}
+	}
+
+	if ( '' != $template_file ) {
+		if ( ! $load ) ob_start();
+
+		load_template( $template_file, $require_once );
+
+		if ( ! $load ) {
+			$html = ob_get_contents();
+			ob_end_clean();
+
+			return ! empty( $html ) ? $html : false;
+		}
+	}
+
+	return $template_file;
 }
 
 ?>
