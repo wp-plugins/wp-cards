@@ -1,11 +1,11 @@
 <?php
 
-class wp_cards_banner_carousel_widget extends WP_Widget {
+class wp_cards_static_slide_carousel_widget extends WP_Widget {
 	public static $classname = __CLASS__;
 	
 	public function __construct() {
-		parent::__construct( __CLASS__, 'Card - Banner Carousel', array(
-			'description' => 'A page banner carousel for full width "sidebars".',
+		parent::__construct( __CLASS__, 'Card - Static Slide Carousel', array(
+			'description' => 'A static slide carousel card for full width "sidebars".',
 			'classname'   => self::$classname
 		) );
 	}

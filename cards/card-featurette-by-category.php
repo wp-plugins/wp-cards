@@ -5,7 +5,7 @@ class wp_cards_featurette_by_category_widget extends WP_Widget {
 	
 	public function __construct() {
 		parent::__construct( __CLASS__, 'Card - Featurette by Category', array(
-			'description' => 'A recent posts widget for full width "sidebars" featuring the lastest posts from a selected category.',
+			'description' => 'A recent posts card for full width "sidebars" featuring the lastest posts from a selected category.',
 			'classname'   => self::$classname
 		) );
 	}
@@ -48,7 +48,7 @@ class wp_cards_featurette_by_category_widget extends WP_Widget {
 				<div class="featurette row">
 					<div class="col col-6 col-sm-12 col-md-6 <?php echo $thumb_class; ?>">
 						<a href="<?php the_permalink(); ?>" title="<?php the_title_attribute(); ?>">
-							<?php the_post_thumbnail( array( '460', '300', array( 'class' => "featurette-image img-responsive" ) ) ); ?>
+							<?php the_post_thumbnail( array( '460', '300' ), array( 'class' => "featurette-image img-responsive" ) ); ?>
 						</a>
 					</div>
 					<div class="col col-6 col-sm-12 col-md-6">

@@ -87,11 +87,10 @@ class wp_cards_category_carousel_widget extends WP_Widget {
 										<h3><?php echo $post_title; ?></h3>
 									</a>
 							<?php endif; ?>
-								</div>
-							
-
-							</div>
-						</div>
+								</div><!-- /.panel.panel-default -->
+	
+							</div><!-- /.excerpt-wrapper -->
+						</div><!-- /.entry -->
 					<?php
 			  			}
 
