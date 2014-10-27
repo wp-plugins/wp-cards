@@ -1,4 +1,4 @@
-<div <?php post_class( 'entry' ); ?> id="excerpt-<?php the_ID(); ?>" data-post-id="<?php the_ID(); ?>" data-view="spotlight">
+<div class="entry" id="excerpt-<?php the_ID(); ?>" data-post-id="<?php the_ID(); ?>" data-view="spotlight">
 	<div class="col col-6 col-sm-12 col-md-6 entry-thumb">
 		<a href="<?php the_permalink(); ?>" title="<?php the_title_attribute(); ?>">
 			<?php the_post_thumbnail( array( '460', '300' ), array( 'class' => "featurette-image img-responsive" ) ); ?>

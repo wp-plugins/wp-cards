@@ -6,13 +6,13 @@
 			the_post();
 
 			$args = array(
-				'post_type'   => $post->post_type,
+				'post_type'   => get_post_type(),
 				'view'        => $view
 			);
 			wp_cards_excerpt( $args );
 		}
 
-		wp_cards_load_more( array( 'view' => $view, 'target' => 'some_id' ) );
+		/*wp_cards_load_more( array( 'view' => $view, 'target' => 'some_id' ) );*/
 		rewind_posts();
 	}
 

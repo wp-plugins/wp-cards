@@ -1,4 +1,4 @@
-<div <?php post_class( 'entry col col-12' ); ?> id="excerpt-<?php the_ID(); ?>" data-post-id="<?php the_ID(); ?>" data-view="banner">
+<div class="entry col col-12" id="excerpt-<?php the_ID(); ?>" data-post-id="<?php the_ID(); ?>" data-view="banner">
 	<h1 class="entry-title"><?php the_title(); ?></h1>
 	<?php
 		// Get the excerpt

@@ -13,6 +13,8 @@ class wp_cards_archive_widget extends WP_Widget {
 	public function widget( $args, $params ) {
 		extract( $params );
 
+		wp_cards_set_view( $template );
+
 		// Figure out the current page
 		if ( get_query_var('paged') )
 			$page = get_query_var('paged');
@@ -105,11 +107,13 @@ class wp_cards_archive_widget extends WP_Widget {
 		$templates = array( 
 			'list' => 'List', 
 			'grid' => 'Grid', 
-			'tile' => 'Tile', 
+			'tile' => 'Tile'
+			/*,
 			'mini' => 'Mini', 
 			'spotlight' => 'Spotlight', 
 			'banner' => 'Banner', 
 			'featurette' => 'Featurette'
+			*/
 		);
 
 		foreach ( $templates as $temp_key => $temp_val ) : ?>

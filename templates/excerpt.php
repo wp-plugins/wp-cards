@@ -1,10 +1,10 @@
 <?php $view = wp_cards_get_view(); ?>
-<div <?php post_class( 'entry col-12 col-lg-12' ); ?>>
+<div class="entry col col-lg-12">
 	<div id="excerpt-<?php the_ID(); ?>" class="excerpt-wrapper" data-post-id="<?php the_ID(); ?>" data-view="<?php echo $view; ?>">
 		<?php if ( $imgdata = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ), array('400','300') ) )  : ?>
 		<div class="panel panel-default has-thumb">
 			<a href="<?php the_permalink(); ?>">
-				<div class="excerpt-thumb" style="background-image:url('<?php echo $imgdata[0]; ?>');"></div>
+				<div class="excerpt-thumb cover-image" style="background-image:url('<?php echo $imgdata[0]; ?>');"></div>
 			</a>
 			<div class="panel-body">
 		<?php else: ?>

@@ -69,7 +69,7 @@ class wp_cards_category_carousel_widget extends WP_Widget {
 							the_post();
 							global $post;
 					?>
-						<div <?php post_class( 'entry col col-3 col-sm-6 col-lg-3' ); ?>>
+						<div class="entry col col-3 col-sm-6 col-lg-3">
 							<div class="excerpt-wrapper" id="excerpt-<?php the_ID(); ?>" data-post-id="<?php the_ID(); ?>">
 					<?php
 							// Remove the word "Private" from the title

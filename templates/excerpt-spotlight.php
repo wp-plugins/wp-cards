@@ -1,4 +1,4 @@
-<div <?php post_class( 'entry col col-md-4' ); ?> id="excerpt-<?php the_ID(); ?>" data-post-id="<?php the_ID(); ?>" data-view="spotlight">
+<div class="entry col col-md-4" id="excerpt-<?php the_ID(); ?>" data-post-id="<?php the_ID(); ?>" data-view="spotlight">
 	<?php the_post_thumbnail( array( '300', '300' ), array( 'class' => "img-circle", 'alt' => get_the_title() ) ); ?>
 	<h2 class="entry-title"><?php the_title(); ?></h2>
 	<?php

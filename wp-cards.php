@@ -3,7 +3,7 @@
 Plugin Name: WP Cards
 Plugin URI: http://davidscotttufts.com/wp-cards/
 Description: Allows for theme developers to add "cards" to their theme's homepage and header
-Version: 1.1
+Version: 1.2
 Author: David S. Tufts
 Author URI: http://davidscotttufts.com/
 Text Domain: card design
@@ -33,9 +33,11 @@ $valid_views = array( 'list' => 'List', 'grid' => 'Grid', 'tile' => 'Tile', 'min
 		
 add_action( 'plugins_loaded', 'wp_cards_load_textdomain' );
 add_action( 'widgets_init', 'wp_cards_widgets_register');
+add_action( 'admin_menu', 'wp_cards_plugin_menu' );
 
 define( 'WPCARDSPATH', dirname( __FILE__ ) );
 require_once(WPCARDSPATH.'/wp-cards-excerpt.php');
+require_once(WPCARDSPATH.'/wp-cards-plugin-options.php');
 
 /** Run activation when the plugin is activated */
 register_activation_hook(__FILE__, 'wp_cards_activation');
@@ -75,7 +77,16 @@ function wp_cards_load_textdomain() {
 }
 
 function wp_cards_enqueue_scripts() {
+	global $wp_cards_plugin_options;
 	wp_enqueue_style('wp-cards', plugins_url( 'wp-cards/includes/css/components.css' ), false, wp_cards_auto_version('/css/components.css', true), 'screen');
+
+	// Bootstrap
+	if ( 'enable' == $wp_cards_plugin_options['include_bootstrap_files']['value'] ) {
+		wp_register_style('bootstrap-styles', '//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css', array(), null, 'all');
+		wp_enqueue_style('bootstrap-styles');
+		wp_register_script('bootstrap-scripts', '//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js', array('jquery'), null, true);
+		wp_enqueue_script('bootstrap-scripts');
+	}
 }
 
 function wp_cards_auto_version( $url, $plugin_dir = true ) {

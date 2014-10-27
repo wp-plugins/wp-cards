@@ -1,9 +1,9 @@
-<div <?php post_class( 'entry col-4 col-xxs-12 col-xs-6 col-md-4 col-lg-3' ); ?>>
+<div class="entry col col-xs-12 col-md-6 col-lg-4">
 	<div class="excerpt-wrapper" id="excerpt-<?php the_ID(); ?>" data-post-id="<?php the_ID(); ?>" data-view="grid">
 		<?php if ( $imgdata = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ), array('300','200') ) )  : ?>
 		<div class="panel panel-default has-thumb">
 			<a href="<?php the_permalink(); ?>" rel="bookmark">
-				<div class="panel-heading excerpt-thumb" style="background-image:url('<?php echo $imgdata[0]; ?>');"></div>
+				<div class="panel-heading excerpt-thumb cover-image" style="background-image:url('<?php echo $imgdata[0]; ?>');"></div>
 			</a>
 		<?php else : ?>
 		<div class="panel panel-default">

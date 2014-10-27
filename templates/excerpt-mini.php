@@ -1,4 +1,4 @@
-<div <?php post_class( 'entry col col-sm-6 col-md-2 colheight-sm-1' ); ?>>
+<div class="entry col col-sm-6 col-md-2 colheight-sm-1">
 	<div class="excerpt-wrapper" id="excerpt-<?php the_ID(); ?>" data-post-id="<?php the_ID(); ?>" data-view="mini">
 		<?php
 			$category_tag = '';
