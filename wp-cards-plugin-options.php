@@ -8,6 +8,16 @@ $wp_cards_plugin_options = array(
 		'type'    => 'checkbox',
 		'id'      => 'wp_cards_include_bootstrap_files',
 		'default' => 'disable'
+	),
+	'bootstrap_css_cdn'  => array(
+		'type'    => 'text',
+		'id'      => 'wp_cards_bootstrap_css_cdn',
+		'default' => '//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css'
+	),
+	'bootstrap_js_cdn'  => array(
+		'type'    => 'text',
+		'id'      => 'wp_cards_bootstrap_js_cdn',
+		'default' => '//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js'
 	)
 );
 
@@ -63,7 +73,9 @@ function wp_cards_plugin_menu() {
 		}
 	}
 
-	add_menu_page( 'WP-Cards', 'WP-Cards', 'manage_options', basename(__FILE__), 'wp_cards_options_form' );
+	add_options_page( 'WP-Cards Options', 'WP-Cards', 'manage_options', 'wp_cards_options', 'wp_cards_options_form' );
+	// add_theme_page( 'WP-Cards Options', 'WP-Cards', 'edit_theme_options', basename(__FILE__), 'wp_cards_options_form' );
+	// add_menu_page( 'WP-Cards', 'WP-Cards', 'manage_options', basename(__FILE__), 'wp_cards_options_form' );
 }
 
 function wp_cards_options_form() {
@@ -73,28 +85,42 @@ function wp_cards_options_form() {
 ?>
 <div class="wrap">
 	<div class="icon32" id="icon-themes"><br /></div>
-	<h2>WP-Cards Plugin Options</h2>
-	<?php if ( esc_attr( $_REQUEST['on_save'] ) ) : ?>
-	<div id="message" class="updated fade"><p><strong>Plugin settings saved.</strong></p></div>
+	<h2><?php _e( 'WP-Cards Plugin Options', 'wp-cards' ); ?></h2>
+	<?php if ( !empty( $_REQUEST['on_save'] ) && esc_attr( $_REQUEST['on_save'] ) ) : ?>
+	<div id="message" class="updated fade"><p><strong><?php _e( 'Plugin settings saved.', 'wp-cards' ); ?></strong></p></div>
 	<?php endif; ?>
 	<form method="post">
 		<input type="hidden" name="action" value="save">
 		<input type="hidden" name="page" value="<?php echo $current_page; ?>" id="current_module">
+		<div id="edge-mode" class="updated fade">
+			<h3>Bootstrap</h3>
+			<p><?php _e( 'WP-Cards uses Bootstrap\'s CSS and JavaScript files for its responsive layout and rotating carousels.', 'wp-cards' ); ?></p>
+		</div>
 		<table class="form-table">
 			<tr valign="top" class="checkbox">
-				<th scope="row">
-					<label for="wp_cards_include_bootstrap_files">Include Bootstrap files</label></th><td colspan="2">
+				<th scope="row"><label for="wp_cards_include_bootstrap_files"><?php _e( 'Include Bootstrap files', 'wp-cards' ); ?></label></th>
+				<td colspan="2">
 					<input id="wp_cards_include_bootstrap_files"<?php echo ( 'enable' == $include_bootstrap_files['value'] ? ' checked="checked"' : '' ); ?> type="checkbox" name="wp_cards_include_bootstrap_files" value="<?php echo $include_bootstrap_files['value']; ?>">
-					<label for="wp_cards_include_bootstrap_files">WP Cards uses Bootstrap 3, if your theme already includes Bootstap 3, you do not need to check this box.</label>
+					<label for="wp_cards_include_bootstrap_files"><?php _e( 'WP-Cards can add Bootstrap to the theme, if the current theme already includes Bootstap, do not check this box.', 'wp-cards' ); ?></label>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><label for="wp_cards_bootstrap_css_cdn"><?php _e( 'Bootstrap CDN Path for CSS', 'wp-cards' ); ?></label></th>
+				<td>
+					<input name="wp_cards_bootstrap_css_cdn" type="text" id="wp_cards_bootstrap_css_cdn" value="<?php echo $bootstrap_css_cdn['value']; ?>" class="regular-text code">
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><label for="wp_cards_bootstrap_js_cdn"><?php _e( 'Bootstrap CDN Path for JS', 'wp-cards' ); ?></label></th>
+				<td>
+					<input name="wp_cards_bootstrap_js_cdn" type="text" id="wp_cards_bootstrap_js_cdn" value="<?php echo $bootstrap_js_cdn['value']; ?>" class="regular-text code">
 				</td>
 			</tr>
 		</table>
-		<?php echo $form_options; ?>
-		<p class="submit"><input type="submit" name="Submit" value="Save Changes" class="button-primary"></p>
+		<p class="submit"><input type="submit" name="Submit" value="<?php _e( 'Save Changes', 'wp-cards' ); ?>" class="button-primary"></p>
 	</form>
 </div>
 <?php
-	unset( $elements );
 }
 
 ?>

@@ -19,7 +19,7 @@ class wp_cards_spotlight_widget extends WP_Widget {
 		
 		?>
 		<!-- Three columns of text with circle images -->
-		<div class="row spotlight">
+		<div class="row spotlight-view">
 			<div class="col col-md-4">
 				<img class="img-circle" src="<?php echo $panel_1_image; ?>" alt="<?php echo $panel_1_title; ?>">
 				<h2><?php echo $panel_1_title; ?></h2>

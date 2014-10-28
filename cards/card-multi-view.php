@@ -1,11 +1,11 @@
 <?php
 
-class wp_cards_archive_widget extends WP_Widget {
+class wp_cards_multi_view_widget extends WP_Widget {
 	public static $classname = __CLASS__;
 	
 	public function __construct() {
-		parent::__construct( __CLASS__, 'Card - Archive View', array(
-			'description' => 'An archive view card for full width "sidebars".',
+		parent::__construct( __CLASS__, 'Card - Multi View', array(
+			'description' => 'A multi-view customizable layout card for full width "sidebars".',
 			'classname'   => self::$classname
 		) );
 	}
@@ -105,13 +105,13 @@ class wp_cards_archive_widget extends WP_Widget {
 	<select name="<?php echo $this->get_field_name( 'template' ); ?>" id="<?php echo $this->get_field_id( 'template' ); ?>" class="postform">
 		<?php 
 		$templates = array( 
-			'list' => 'List', 
-			'grid' => 'Grid', 
-			'tile' => 'Tile'
-			/*,
-			'mini' => 'Mini', 
-			'spotlight' => 'Spotlight', 
-			'banner' => 'Banner', 
+			'list'       => 'List', 
+			'grid'       => 'Grid', 
+			'tile'       => 'Tile',
+			'mini'       => 'Mini',
+			'spotlight'  => 'Spotlight'
+			/*, 
+			'banner'     => 'Banner', 
 			'featurette' => 'Featurette'
 			*/
 		);

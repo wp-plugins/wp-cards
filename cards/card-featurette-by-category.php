@@ -37,7 +37,7 @@ class wp_cards_featurette_by_category_widget extends WP_Widget {
 		?>
 		<div class="section content bg-base">
 			<h2 class="section-title ribbon"><span><?php echo $title; ?></span></h2>
-			<div class="entries style-featurette-by-category-panel">
+			<div class="entries featurette-view">
 			<?php
 				// Query the data
 				wp_cards_query( $query_args );
@@ -45,14 +45,14 @@ class wp_cards_featurette_by_category_widget extends WP_Widget {
 				while ( have_posts() ) : the_post(); 
 					$thumb_class = ( $post_count % 2 ) ? 'pull-right' : 'pull-left';
 				?>
-				<div class="featurette row">
+				<div class="row">
 					<div class="col col-6 col-sm-12 col-md-6 <?php echo $thumb_class; ?>">
 						<a href="<?php the_permalink(); ?>" title="<?php the_title_attribute(); ?>">
 							<?php the_post_thumbnail( array( '460', '300' ), array( 'class' => "featurette-image img-responsive" ) ); ?>
 						</a>
 					</div>
 					<div class="col col-6 col-sm-12 col-md-6">
-						<h2 class="featurette-heading"><a href="<?php the_permalink(); ?>" rel="bookmark"><?php the_title(); ?></a></h2>
+						<h2 class="entry-title"><a href="<?php the_permalink(); ?>" rel="bookmark"><?php the_title(); ?></a></h2>
 						<?php
 					
 						// Get the excerpt

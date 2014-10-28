@@ -2,7 +2,7 @@
 <div class="container">
 	<h1><?php _e( 'Card Staging Area', 'wp-cards' ); ?></h1>
 	<div class="alert alert-warning hidden-xs hidden-sm hidden-md hidden-lg" role="alert">
-		<strong><?php _e( 'Bootstrap is not enabled', 'wp-cards' ); ?></strong> <?php printf( __( 'WP Cards requires that Bootstrap CSS and JavaScript files to be loaded, active these files under Theme Options <a href="%1$s" class="alert-link" target="_blank">here</a>.', 'wp-cards' ), admin_url( 'themes.php?page=theme-options' ) ); ?>
+		<strong><?php _e( 'Bootstrap is not enabled', 'wp-cards' ); ?></strong> <?php printf( __( 'WP Cards requires that Bootstrap CSS and JavaScript files to be loaded, active these files under Theme Options <a href="%1$s" class="alert-link" target="_blank">here</a>.', 'wp-cards' ), admin_url( 'options-general.php?page=wp_cards_options' ) ); ?>
 	</div>
 <?php if ( ! dynamic_sidebar( 'card_staging' ) ) : ?>
 	<!-- Card Staging -->
