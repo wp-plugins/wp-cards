@@ -36,9 +36,16 @@ class wp_cards_multi_view_widget extends WP_Widget {
 			'posts_per_page'   => $posts_per_page,
 			'suppress_filters' => true,
 			'post_type'        => $post_type,
-			'orderby'          => $sort_field,
-			'order'            => $sort_direction
+			'orderby'          => $sort_field
 		);
+
+		if ( 'meta_field' == $sort_field && ! empty( $meta_sort_field ) ) {
+			$query_args[ 'orderby' ]  = 'meta_value';
+			$query_args[ 'meta_key' ] = $meta_sort_field;
+			//$query_args[ 'meta_query' ] = array();			
+		} else {
+			$query_args[ 'orderby' ] = $sort_field;
+		}
 
 		if ( ! empty( $include_arr ) ) {
 			$tax_query[] = array(
@@ -50,11 +57,22 @@ class wp_cards_multi_view_widget extends WP_Widget {
 		}
 
 		wp_cards_query( $query_args );
+		global $wp_query;
+		//echo '<pre>'; print_r($wp_query); echo '</pre>';
 		
 		if ( ! empty ( $args['before_widget'] ) ) {
 			echo $args['before_widget'];
 		}
 		
+		if ( current_user_can( 'manage_options' ) && 'on' === $debug_query ) {
+			echo '<h3>Query Vars:</h3><pre>'; print_r($wp_query->query); echo '</pre>';
+			echo '<h3>Request:</h3><pre>'; print_r($wp_query->request); echo '</pre>';
+		}
+	
+		if ( current_user_can( 'manage_options' ) && 'on' === $debug_results ) {
+			echo '<h3>Results:</h3><pre>'; print_r($wp_query->posts); echo '</pre>';
+		}
+
 		?>
 		<div class="section content bg-base">
 			<h2 class="section-title ribbon"><span><?php echo $title; ?></span></h2>
@@ -87,7 +105,9 @@ class wp_cards_multi_view_widget extends WP_Widget {
 			'post_type'      => 'post',
 			'taxonomy'       => 'category',
 			'sort_field'     => 'date',
-			'sort_direction' => 'DESC'
+			'sort_direction' => 'DESC',
+			'debug_query'     => '',
+			'debug_results'   => ''
 		);
 		$instance = wp_parse_args( (array) $instance, $defaults );
                 
@@ -132,7 +152,7 @@ class wp_cards_multi_view_widget extends WP_Widget {
 	</select>
 </p>
 <p>
-	<label for="<?php echo $this->get_field_id( 'taxonomy' ); ?>"><?php _e( 'Taxonomy', 'wp-cards' ); ?>:</label> 
+	<label for="<?php echo $this->get_field_id( 'taxonomy' ); ?>"><?php _e( 'Taxonomy Slug', 'wp-cards' ); ?>:</label> 
 	<input type="text" class="widefat" id="<?php echo $this->get_field_id( 'taxonomy' ); ?>" name="<?php echo $this->get_field_name( 'taxonomy' ); ?>" value="<?php echo $instance['taxonomy']; ?>" />
 </p>
 <p>
@@ -142,14 +162,15 @@ class wp_cards_multi_view_widget extends WP_Widget {
 	$uncategorized_id = get_cat_ID( 'Uncategorized' );
 
 	$cat_args = array(
-		'type'         => 'post',
-		'order'        => 'ASC',
-		'orderby'      => 'name',
-		'parent'       => 0,
-		'hide_empty'   => 1,
-		'hierarchical' => 0,
-		'taxonomy'     => strtolower( $instance['taxonomy'] ),
-		'exclude'      => $uncategorized_id
+		'type'            => 'post',
+		'order'           => 'ASC',
+		'orderby'         => 'name',
+		'parent'          => 0,
+		'hide_empty'      => 1,
+		'hierarchical'    => 0,
+		'meta_sort_field' => '',
+		'taxonomy'        => strtolower( $instance['taxonomy'] ),
+		'exclude'         => $uncategorized_id
 	);
 
 	$categories = get_categories( $cat_args );
@@ -157,14 +178,63 @@ class wp_cards_multi_view_widget extends WP_Widget {
 		<p><input class="checkbox" type="checkbox" <?php checked( (bool) $instance['include'][$category->term_id], true ); ?> name="<?php echo $this->get_field_name( 'include' ); ?>[<?php echo $category->term_id; ?>]"><?php echo $category->cat_name; ?></p>
 	<?php endforeach; ?>
 <p>
-	<label for="<?php echo $this->get_field_id( 'sort_field' ); ?>"><?php _e( 'Sort Field', 'wp-cards' ); ?>:</label> 
-	<input type="text" class="widefat" id="<?php echo $this->get_field_id( 'sort_field' ); ?>" name="<?php echo $this->get_field_name( 'sort_field' ); ?>" value="<?php echo $instance['sort_field']; ?>" />
+	<label for="<?php echo $this->get_field_id( 'sort_field' ); ?>"><?php _e( 'Sort Field', 'wp-cards' ); ?>:</label>
+	<select name="<?php echo $this->get_field_name( 'sort_field' ); ?>" id="<?php echo $this->get_field_id( 'sort_field' ); ?>" class="postform">
+		<?php 
+		$sort_field = array( 
+			'date'       => __( 'Date', 'wp-cards' ), 
+			'title'      => __( 'Title', 'wp-cards' ),
+			'meta_field' => __( 'Use a custom meta field', 'wp-cards' )
+		);
+
+		foreach ( $sort_field as $sort_key => $sort_val ) : ?>
+			<option class="level-0" value="<?php echo $sort_key; ?>" <?php echo ( $instance['sort_field'] == $sort_key ) ? ' selected="selected"' : ''; ?>><?php echo $sort_val; ?></option>
+		<?php endforeach; ?>
+	</select>
+	<script type="text/javascript">
+		jQuery(document).ready( function($) {
+			$('#<?php echo $this->get_field_id( 'sort_field' ); ?>').live('change', function(e) {
+				var selected_value = this[this.selectedIndex].value;
+				var selected_container = $('#<?php echo $this->get_field_id( 'sort_field' ); ?>-input');
+				if ( selected_value == 'meta_field' ) {
+		    		selected_container.css('display','block');
+				} else {
+		    		selected_container.css('display','none');
+				}
+			});
+		});
+	</script>
+</p>
+<p id="<?php echo $this->get_field_id( 'sort_field' ); ?>-input" <?php echo ( $instance['sort_field'] != 'meta_field' ) ? ' style="display:none;"' : ''; ?>>
+	<label for="<?php echo $this->get_field_id( 'meta_sort_field' ); ?>"><?php _e( 'Meta Sort Field', 'wp-cards' ); ?>:</label>
+	<input type="text" class="widefat" id="<?php echo $this->get_field_id( 'meta_sort_field' ); ?>" name="<?php echo $this->get_field_name( 'meta_sort_field' ); ?>" value="<?php echo $instance['meta_sort_field']; ?>" />
 </p>
 <p>
 	<label for="<?php echo $this->get_field_id( 'sort_direction' ); ?>"><?php _e( 'Sort Direction', 'wp-cards' ); ?>:</label> 
-	<input type="text" class="widefat" id="<?php echo $this->get_field_id( 'sort_direction' ); ?>" name="<?php echo $this->get_field_name( 'sort_direction' ); ?>" value="<?php echo $instance['sort_direction']; ?>" />
+	<select name="<?php echo $this->get_field_name( 'sort_direction' ); ?>" id="<?php echo $this->get_field_id( 'sort_direction' ); ?>" class="postform">
+		<?php 
+		$sort_dir = array( 
+			'ASC'       => __( 'Ascending', 'wp-cards' ), 
+			'DESC'      => __( 'Descending', 'wp-cards' )
+		);
+
+		foreach ( $sort_dir as $sort_key => $sort_val ) : ?>
+			<option class="level-0" value="<?php echo $sort_key; ?>" <?php echo ( $instance['sort_direction'] == $sort_key ) ? ' selected="selected"' : ''; ?>><?php echo $sort_val; ?></option>
+		<?php endforeach; ?>
+	</select>
 </p>
-	<?php
+<?php if ( current_user_can( 'manage_options' ) ) : ?>
+<h3><?php _e( 'Debug', 'wp-cards' ); ?></h3>
+<p><small><?php _e( 'Logged in admin users will be able to see output on the screen for debugging purposes.', 'wp-cards' ); ?></small></p>
+<p>
+	<input class="checkbox" type="checkbox" <?php checked( (bool) $instance['debug_query'], true ); ?> name="<?php echo $this->get_field_name( 'debug_query' ); ?>" id="<?php echo $this->get_field_id( 'debug_query' ); ?>">
+	<label for="<?php echo $this->get_field_id( 'debug_query' ); ?>"><?php _e( 'Show the query' ); ?></label>
+</p>
+<p>
+	<input class="checkbox" type="checkbox" <?php checked( (bool) $instance['debug_results'], true ); ?> name="<?php echo $this->get_field_name( 'debug_results' ); ?>" id="<?php echo $this->get_field_id( 'debug_results' ); ?>">
+	<label for="<?php echo $this->get_field_id( 'debug_results' ); ?>"><?php _e( 'Show the query results' ); ?></label>
+</p>
+<?php endif;
 	}
 
 	public function update( $new_instance, $old_instance ) {
@@ -177,6 +247,9 @@ class wp_cards_multi_view_widget extends WP_Widget {
 		$instance['taxonomy'] = strip_tags( $new_instance['taxonomy'] );
 		$instance['sort_field'] = strip_tags( $new_instance['sort_field'] );
 		$instance['sort_direction'] = strip_tags( $new_instance['sort_direction'] );
+		$instance['meta_sort_field'] = strip_tags( $new_instance['meta_sort_field'] );
+		$instance['debug_query'] = strip_tags( $new_instance['debug_query'] );
+		$instance['debug_results'] = strip_tags( $new_instance['debug_results'] );
 		$uncategorized_id = get_cat_ID( 'Uncategorized' );
 
 		$cat_args = array(

@@ -2,20 +2,6 @@
 
 class wp_cards_jumbotron_search_widget extends WP_Widget {
 	public static $classname = __CLASS__;
-	private $pages = array(
-		'is_404'               => '404 Page',
-		'is_archive'           => 'Archive Page',
-		'is_author'            => 'Author Page',
-		'is_category'          => 'Category Page',
-		'is_front_page'        => 'Front Page',
-		'is_home'              => 'Home Page',
-		'is_page'              => 'Page',
-		'is_post_type_archive' => 'Custom Post Type Archive',
-		'is_search'            => 'Search Page',
-		'is_single'            => 'Single Post or Page',
-		'is_tag'               => 'Tags Page',
-		'is_tax'               => 'Custom Taxonomy Page'
-	);
 	
 	public function __construct() {
 		parent::__construct( __CLASS__, 'Card - Jumbotron for Search', array(
@@ -27,20 +13,7 @@ class wp_cards_jumbotron_search_widget extends WP_Widget {
 	public function widget( $args, $params ) {
 		$exit_widget = true;
 		extract( $params );
-
-		// Determine if we should show this widget
-		foreach( $this->pages as $page_name => $page_title ) {
-			if ( (bool)$visibility[$page_name] ) {
-				if ( $page_name() ) {
-					$exit_widget = false;
-				}
-			}
-		}
 		
-		if ( $exit_widget ) {
-			return;
-		}
-
 		if ( ! empty ( $args['before_widget'] ) ) {
 			echo $args['before_widget'];
 		}
@@ -112,10 +85,6 @@ class wp_cards_jumbotron_search_widget extends WP_Widget {
 	<label><?php _e( 'Show on Pages', 'wp-cards' ); ?>:</label>
 </p>
 <?php
-		foreach($this->pages as $page_name => $page_title ) : ?>
-			<p><input class="checkbox" type="checkbox" <?php checked( (bool) $instance['visibility'][$page_name], true ); ?> name="<?php echo $this->get_field_name( 'visibility' ); ?>[<?php echo $page_name; ?>]"><?php echo $page_title; ?></p>
-		<?php endforeach;
-
 	}
 
 	public function update( $new_instance, $old_instance ) {
@@ -127,14 +96,6 @@ class wp_cards_jumbotron_search_widget extends WP_Widget {
 		$instance['search_text'] = strip_tags( $new_instance['search_text'] );
 		$instance['image_url'] = strip_tags( $new_instance['image_url'] );
 		$instance['height'] = strip_tags( $new_instance['height'] );
-
-		foreach( $this->pages as $page_name => $page_title ) {
-			if ( isset( $new_instance['visibility'][ $page_name ] ) ) {
-				$instance['visibility'][ $page_name ] = strip_tags( $new_instance['visibility'][ $page_name ] );
-			} else {
-				$instance['visibility'][ $page_name ] = 0;
-			}
-		}
 
 		return $instance;  
 	}

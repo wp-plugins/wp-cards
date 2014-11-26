@@ -132,52 +132,68 @@
 	height: 38px;
 	width: 38px;
 	border:1px solid #ccc;
-	background-image: none;
-	flter: none;
-	background-color:#fff;
 }
 .category-carousel .carousel-control.left {
 	left: auto;
 	right: 46px;
+	background-image: none;
+	background-color:#fff;
+	flter: none;
+}
+.category-carousel .carousel-control.right {
+	background-image: none;
+	background-color:#fff;
+	flter: none;
 }
 .category-carousel .carousel-control .glyphicon-chevron-right,
 .category-carousel .carousel-control .glyphicon-chevron-left {
+	position:relative;
+	top:3px;
 	right:auto;
 	left:auto;
 	font-size: 25px;
 	line-height: 30px;
+	margin: 0;
 }
-.category-carousel h2 {
+.category-view-all {
+	float: right;
+	margin-right: 85px;
+}
+.category-view-all a {
+	font-size:16px;
+	line-height:40px;
+}
+.old-category-carousel h2 {
 	margin: 0 0 10px 0;
 }
-.category-carousel .panel {
+.old-category-carousel .panel {
 	position: relative;
 	height: 200px;
 	margin-bottom:15px;
 }
-.category-carousel .panel.has-thumb {
+.old-category-carousel .panel.has-thumb {
 	border: none;
 }
-.category-carousel .excerpt-thumb {
+.old-category-carousel .excerpt-thumb {
 	height: 200px;
 	text-align:center;
 	overflow:hidden;
 }
-.category-carousel .has-thumb .excerpt-thumb {
+.old-category-carousel .has-thumb .excerpt-thumb {
 	background-size: 100% auto;
 	background-repeat: no-repeat;
 	background-position: 50% 50%;
 }
-.category-carousel .excerpt-wrapper .excerpt-thumb {
+.old-category-carousel .excerpt-wrapper .excerpt-thumb {
 	opacity:1;
     transition: opacity .35s ease-in-out;
     -webkit-transition: opacity .35s ease-in-out;
     -moz-transition: opacity .35s ease-in-out;
 }
-.category-carousel .excerpt-wrapper:hover .excerpt-thumb {
+.old-category-carousel .excerpt-wrapper:hover .excerpt-thumb {
 	opacity:0.7;
 }
-.category-carousel .excerpt-wrapper h3 {
+.old-category-carousel .excerpt-wrapper h3 {
 	color:#333;
 	position:absolute;
 	top:0;
@@ -188,7 +204,7 @@
 	padding: 50px 15px 10px 15px;
 	text-align: left;
 }
-.category-carousel .excerpt-wrapper .has-thumb h3 {
+.old-category-carousel .excerpt-wrapper .has-thumb h3 {
 	top:auto;
 	color: #fff;
 	padding-top:10px;
@@ -200,31 +216,31 @@
 	background-color:rgba(5,5,5,.6); /* Works on all modern browsers */
 	/*background: transparent url(./images/black50.png) repeat 0 0;*/
 }
-.category-carousel .excerpt-wrapper, .category-carousel .excerpt-wrapper h3 {
+.old-category-carousel .excerpt-wrapper, .category-carousel .excerpt-wrapper h3 {
 	-webkit-transition: 0.3s;
 	-moz-transition: 0.3s;
 	-ms-transition: 0.3s;
 	-o-transition: 0.3s;
 	transition: 0.3s;     
 }
-.category-carousel .excerpt-wrapper:hover h3 {
+.old-category-carousel .excerpt-wrapper:hover h3 {
 	white-space: normal;
 	text-overflow:none;
 	padding-bottom:50px;
 }
-.category-carousel .status-private .excerpt-wrapper h3 {
+.old-category-carousel .status-private .excerpt-wrapper h3 {
 	color: #CC0000;
 }
-.category-carousel .excerpt-wrapper a:hover {
+.old-category-carousel .excerpt-wrapper a:hover {
 	text-decoration:none;
 }
-.category-carousel article .wp-caption {
+.old-category-carousel article .wp-caption {
 	position:relative;
 	padding:0;
 	margin: 0 0 10px 0;
 	border-width: 0 0 1px 0;
 }
-.category-carousel article .wp-caption-text {
+.old-category-carousel article .wp-caption-text {
 	position: absolute;
 	margin: 0;
 	top: 0;
