@@ -81,9 +81,6 @@ class wp_cards_jumbotron_search_widget extends WP_Widget {
 	<label for="<?php echo $this->get_field_id( 'height' ); ?>"><?php _e( 'Min Height', 'wp-cards' ); ?>:</label> 
 	<input type="text" class="widefat" id="<?php echo $this->get_field_id( 'height' ); ?>" name="<?php echo $this->get_field_name( 'height' ); ?>" value="<?php echo $instance['height']; ?>" />
 </p>
-<p>
-	<label><?php _e( 'Show on Pages', 'wp-cards' ); ?>:</label>
-</p>
 <?php
 	}
 
