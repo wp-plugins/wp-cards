@@ -112,6 +112,7 @@ class wp_cards_jumbotron_register_widget extends WP_Widget {
 		$instance = wp_parse_args( (array) $instance, $defaults );
                 
 ?>
+<p><small><?php _e( 'Note: Logged in users will noy be able to see this card, since they are already registered.', 'wp-cards' ); ?></small></p>
 <p>
 	<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title', 'wp-cards' ); ?>:</label> 
 	<input type="text" class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" value="<?php echo $instance['title']; ?>" />
