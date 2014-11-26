@@ -145,9 +145,6 @@ class wp_cards_jumbotron_register_widget extends WP_Widget {
 	<label for="<?php echo $this->get_field_id( 'css' ); ?>"><?php _e( 'Custom CSS', 'wp-cards' ); ?>:</label>
 	<textarea class="widefat" rows="2" cols="20" id="<?php echo $this->get_field_id( 'css' ); ?>" name="<?php echo $this->get_field_name( 'css' ); ?>"><?php echo $instance['css']; ?></textarea>
 </p>
-<p>
-	<label><?php _e( 'Show on Pages', 'wp-cards' ); ?>:</label>
-</p>
 <?php
 	}
 
