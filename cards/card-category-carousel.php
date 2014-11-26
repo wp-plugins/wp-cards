@@ -13,28 +13,31 @@ class wp_cards_category_carousel_widget extends WP_Widget {
 	public function widget( $args, $params ) {
 		extract( $params );
 
-		$exclude_arr[] = get_cat_ID( 'Uncategorized' );
-
-		foreach ( $exclude as $key => $value ) {
-			if ( 'on' === $value ) {
-				$exclude_arr[] = $key;
-			}
-		}
-
-		$exclude_string = implode( ',', $exclude_arr );
 		$cat_args = array(
-			'type'         => 'post',
+			'type'         => $post_type,
 			'order'        => 'ASC',
 			'parent'       => 0,
 			'hide_empty'   => 1,
 			'hierarchical' => 0,
-			'taxonomy'     => 'category',
-			'exclude'      => $exclude_string
+			'taxonomy'     => strtolower( $taxonomy )
 		);
+
+		$include_arr = array();
+		foreach ( $include as $key => $value ) {
+			if ( 'on' === $value ) {
+				$include_arr[] = $key;
+			}
+		}
+
+		if ( ! empty( $include_arr ) ) {
+			$cat_args['include'] = implode(',', $include_arr);
+		}
 
 		// Grab the categories from the database
 		$categories = get_categories( $cat_args );
+
 		$first_slide = true;
+		$pages = ceil( $posts_per_page / $posts_per_slide );
 
 		// Begin outputting the widget HTML
 		if ( ! empty ( $args['before_widget'] ) ) {
@@ -44,63 +47,63 @@ class wp_cards_category_carousel_widget extends WP_Widget {
 		<div id="<?php echo $args['widget_id']; ?>" class="section carousel category-carousel slide">
 			<div class="carousel-inner">
 			<?php foreach ( $categories as $category ) :
-				if ( $first_slide ) {
-					$active_class = ' active';
-					$first_slide = false;
-				} else {
-					$active_class = '';
-				} ?>
+				$current_page = 1;
+				
+				while( $current_page <= $pages ) :
+
+					$offset = intval( ( $current_page - 1 ) * $posts_per_slide );
+					$number_of_posts = $current_page == $pages ? $posts_per_page - $offset : $posts_per_slide;
+					//echo '<pre>';print_r($number_of_posts);echo '</pre>';
+					// Create a new query instance
+					$query_args = array(
+						'post_type'        => $post_type,
+						'posts_per_page'   => $number_of_posts,
+						'suppress_filters' => true,
+						'category__in'     => array( $category->term_id ),
+						'offset'           => $offset
+					);
+					wp_cards_query( $query_args );
+					global $wp_query;
+					
+					if ( $wp_query->found_posts ) : 
+						if ( $first_slide ) {
+							$active_class = ' active';
+							$first_slide = false;
+						} else {
+							$active_class = '';
+						}
+					?>
 				<div class="item<?php echo $active_class; ?> <?php echo $category->slug; ?>">
+					<?php
+					if ( current_user_can( 'manage_options' ) && 'on' === $debug_query ) {
+						echo '<h3>Query Vars:</h3><pre>'; print_r($wp_query->query); echo '</pre>';
+						echo '<h3>Request:</h3><pre>'; print_r($wp_query->request); echo '</pre>';
+					}
+					
+					if ( current_user_can( 'manage_options' ) && 'on' === $debug_results ) {
+						echo '<h3>Results:</h3><pre>'; print_r($wp_query->posts); echo '</pre>';
+					}
+					?>
 					<h2 class="section-title ribbon ribbon-highlight"><a href="<?php echo get_category_link( $category->term_id ); ?>"><?php _e( $category->cat_name ); ?></a></h2>
-					<div class="row entries">
-					<?php
-						// Create a new query instance
-						$query_args = array(
-							'post_type'        => 'post',
-							'posts_per_page'   => $posts_per_page,
-							'suppress_filters' => true,
-							'category__in'     => array( $category->term_id )
-						);
-		
-						wp_cards_query( $query_args );
-
-						// Start the Loop.
-						while ( have_posts() ) {
-							the_post();
-							global $post;
-					?>
-						<div class="entry col col-3 col-sm-6 col-lg-3">
-							<div class="excerpt-wrapper" id="excerpt-<?php the_ID(); ?>" data-post-id="<?php the_ID(); ?>">
-					<?php
-							// Remove the word "Private" from the title
-							$post_title = 'private' == $post->post_status ? str_replace('Private: ', '', $post->post_title) : $post->post_title;
-
-							if ( $imgdata = wp_get_attachment_image_src( get_post_thumbnail_id( $post_id ), array('300','200') ) )  : ?>
-								<div class="panel panel-default has-thumb">
-									<a href="<?php the_permalink(); ?>" title="<?php printf( esc_attr__( 'Permalink to %s', 'wp-cards' ), the_title_attribute( 'echo=0' ) ); ?>" rel="bookmark">
-										<div class="panel-heading excerpt-thumb" style="background-image:url('<?php echo $imgdata[0]; ?>');"></div>
-										<h3><?php echo $post_title; ?></h3>
-									</a>
-							<?php else: ?>
-								<div class="panel panel-default">
-									<a href="<?php the_permalink(); ?>" target="_blank" title="<?php printf( esc_attr__( 'Permalink to %s', 'wp-cards' ), the_title_attribute( 'echo=0' ) ); ?>" rel="bookmark">
-										<h3><?php echo $post_title; ?></h3>
-									</a>
-							<?php endif; ?>
-								</div><!-- /.panel.panel-default -->
-	
-							</div><!-- /.excerpt-wrapper -->
-						</div><!-- /.entry -->
-					<?php
-			  			}
-
-						// Reset Post Data
-						wp_cards_reset_query(); 
-					?>
+					<?php if ( 'on' === $enable_view_all ) : ?>
+					<div class="category-view-all"><a href="<?php echo get_category_link( $category->term_id ); ?>"><?php _e( $view_all_text ); ?></a></div>
+					<?php endif; ?>
+					<div class="entries row <?php echo $template; ?>-view">
+						<?php wp_cards_loop( array( 'view' => $template ) ); ?>
 						<div class="clearfix"></div>
 					</div><!--/.row.entries-->
 				</div><!--/.item-->
-			<?php endforeach; // End category foreach ?>
+					<?php elseif ( current_user_can( 'manage_options' ) && 'on' === $debug_query ) : ?>
+						<h3>No results for: </h3><pre><?php print_r($wp_query->query); ?></pre>
+					<?php endif;
+
+					// Reset Post Data
+					wp_cards_reset_query();
+
+					$current_page++; 
+				endwhile; // End current_page
+			endforeach; // End category foreach
+			?>
 			</div><!--/.carousel-inner-->
 			<a class="left carousel-control" href="#<?php echo $args['widget_id']; ?>" data-slide="prev">
 				<span class="glyphicon glyphicon-chevron-left"></span>
@@ -120,41 +123,122 @@ class wp_cards_category_carousel_widget extends WP_Widget {
 		global $wpdb;
 
 		$defaults = array(
-			'posts_per_page' => '4'
+			'posts_per_page'  => '3',
+			'posts_per_slide' => '3',
+			'template'        => 'tile',
+			'post_type'       => 'post',
+			'taxonomy'        => 'category',
+			'enable_view_all' => 'on',
+			'view_all_text'   => 'View All',
+			'debug_query'     => '',
+			'debug_results'   => ''
 		);
 		$instance = wp_parse_args( (array) $instance, $defaults );
                 
 ?>
 <p>
-	<label for="<?php echo $this->get_field_id( 'posts_per_page' ); ?>"><?php _e( 'Number of Posts', 'wp-cards' ); ?>:</label> 
+	<label for="<?php echo $this->get_field_id( 'posts_per_page' ); ?>"><?php _e( 'Number of Posts per Category', 'wp-cards' ); ?>:</label> 
 	<input type="text" class="widefat" id="<?php echo $this->get_field_id( 'posts_per_page' ); ?>" name="<?php echo $this->get_field_name( 'posts_per_page' ); ?>" value="<?php echo $instance['posts_per_page']; ?>" />
 </p>
 <p>
-	<label><?php _e( 'Exclude Categories', 'wp-cards' ); ?>:</label>
+	<label for="<?php echo $this->get_field_id( 'posts_per_slide' ); ?>"><?php _e( 'Number of Posts per Slide', 'wp-cards' ); ?>:</label> 
+	<input type="text" class="widefat" id="<?php echo $this->get_field_id( 'posts_per_slide' ); ?>" name="<?php echo $this->get_field_name( 'posts_per_slide' ); ?>" value="<?php echo $instance['posts_per_slide']; ?>" />
 </p>
-<?php 
-		$uncategorized_id = get_cat_ID( 'Uncategorized' );
-
-		$cat_args = array(
-			'type'         => 'post',
-			'order'        => 'ASC',
-			'orderby'      => 'name',
-			'parent'       => 0,
-			'hide_empty'   => 1,
-			'hierarchical' => 0,
-			'taxonomy'     => 'category',
-			'exclude'      => $uncategorized_id
+<!-- p>
+	<input class="checkbox" type="checkbox" <?php checked( (bool) $instance['view_all_slide'], true ); ?> name="<?php echo $this->get_field_name( 'view_all_slide' ); ?>" id="<?php echo $this->get_field_id( 'view_all_slide' ); ?>">
+	<label for="<?php echo $this->get_field_id( 'view_all_slide' ); ?>"><?php _e( 'Include a "View All" slide' ); ?></label>
+</p -->
+<p>
+	<input class="checkbox" type="checkbox" <?php checked( (bool) $instance['enable_view_all'], true ); ?> name="<?php echo $this->get_field_name( 'enable_view_all' ); ?>" id="<?php echo $this->get_field_id( 'enable_view_all' ); ?>">
+	<label for="<?php echo $this->get_field_id( 'enable_view_all' ); ?>"><?php _e( 'Enable "View All" link' ); ?></label>
+</p>
+<p>
+	<label for="<?php echo $this->get_field_id( 'view_all_text' ); ?>"><?php _e( '"View All" text', 'wp-cards' ); ?>:</label> 
+	<input type="text" class="widefat" id="<?php echo $this->get_field_id( 'view_all_text' ); ?>" name="<?php echo $this->get_field_name( 'view_all_text' ); ?>" value="<?php echo $instance['view_all_text']; ?>" />
+</p>
+<p>
+	<label for="<?php echo $this->get_field_id( 'template' ); ?>"><?php _e( 'View Template', 'wp-cards' ); ?>:</label>
+	<select name="<?php echo $this->get_field_name( 'template' ); ?>" id="<?php echo $this->get_field_id( 'template' ); ?>" class="postform">
+		<?php 
+		$templates = array( 
+			'list'       => 'List', 
+			'grid'       => 'Grid', 
+			'tile'       => 'Tile',
+			'mini'       => 'Mini',
+			'spotlight'  => 'Spotlight'
+			/*, 
+			'banner'     => 'Banner', 
+			'featurette' => 'Featurette'
+			*/
 		);
 
-		$categories = get_categories( $cat_args );
-		foreach($categories as $category) : ?>
-			<p><input class="checkbox" type="checkbox" <?php checked( (bool) $instance['exclude'][$category->term_id], true ); ?> name="<?php echo $this->get_field_name( 'exclude' ); ?>[<?php echo $category->term_id; ?>]"><?php echo $category->cat_name; ?></p>
-		<?php endforeach;
+		foreach ( $templates as $temp_key => $temp_val ) : ?>
+			<option class="level-0" value="<?php echo $temp_key; ?>" <?php echo ( $instance['template'] == $temp_key ) ? ' selected="selected"' : ''; ?>><?php echo $temp_val; ?></option>
+		<?php endforeach; ?>
+	</select>
+</p>
+<p>
+	<label for="<?php echo $this->get_field_id( 'post_type' ); ?>"><?php _e( 'Post Type' ); ?>:</label> 
+	<select id="<?php echo $this->get_field_id( 'post_type' ); ?>" name="<?php echo $this->get_field_name( 'post_type' ); ?>">
+		<option value="post"<?php echo 'post' == $instance['post_type'] ? ' selected="selected"' : ''; ?>><?php _e( 'Post' ); ?></option>
+		<?php foreach ( (array) get_post_types( array('show_ui' => true, '_builtin' => false ) ) as $post_type ) :
+		$selected = $instance['post_type'] == $post_type ? ' selected="selected"' : ''; ?>
+		<option value="<?php echo $post_type; ?>"<?php echo $selected; ?>><?php echo ucwords(str_replace(array("_","-"), " ", $post_type)); ?></option>
+		<?php endforeach; ?>
+	</select>
+</p>
+<p>
+	<label for="<?php echo $this->get_field_id( 'taxonomy' ); ?>"><?php _e( 'Taxonomy Slug', 'wp-cards' ); ?>:</label> 
+	<input type="text" class="widefat" id="<?php echo $this->get_field_id( 'taxonomy' ); ?>" name="<?php echo $this->get_field_name( 'taxonomy' ); ?>" value="<?php echo $instance['taxonomy']; ?>" />
+</p>
+<p>
+	<label><?php _e( 'Include', 'wp-cards' ); ?> <?php echo ucwords(str_replace(array("_","-"), " ", $instance['taxonomy'])); ?>:</label>
+</p>
+<?php 
+	$uncategorized_id = get_cat_ID( 'Uncategorized' );
+
+	$cat_args = array(
+		'type'            => 'post',
+		'order'           => 'ASC',
+		'orderby'         => 'name',
+		'parent'          => 0,
+		'hide_empty'      => 1,
+		'hierarchical'    => 0,
+		'meta_sort_field' => '',
+		'taxonomy'        => strtolower( $instance['taxonomy'] ),
+		'exclude'         => $uncategorized_id
+	);
+
+	$categories = get_categories( $cat_args );
+	foreach( $categories as $category ) : ?>
+<p><input class="checkbox" type="checkbox" <?php checked( (bool) $instance['include'][$category->term_id], true ); ?> name="<?php echo $this->get_field_name( 'include' ); ?>[<?php echo $category->term_id; ?>]"><?php echo $category->cat_name; ?></p>
+	<?php endforeach; ?>
+<?php if ( current_user_can( 'manage_options' ) ) : ?>
+<h3><?php _e( 'Debug', 'wp-cards' ); ?></h3>
+<p><small><?php _e( 'Logged in admin users will be able to see output on the screen for debugging purposes.', 'wp-cards' ); ?></small></p>
+<p>
+	<input class="checkbox" type="checkbox" <?php checked( (bool) $instance['debug_query'], true ); ?> name="<?php echo $this->get_field_name( 'debug_query' ); ?>" id="<?php echo $this->get_field_id( 'debug_query' ); ?>">
+	<label for="<?php echo $this->get_field_id( 'debug_query' ); ?>"><?php _e( 'Show the query' ); ?></label>
+</p>
+<p>
+	<input class="checkbox" type="checkbox" <?php checked( (bool) $instance['debug_results'], true ); ?> name="<?php echo $this->get_field_name( 'debug_results' ); ?>" id="<?php echo $this->get_field_id( 'debug_results' ); ?>">
+	<label for="<?php echo $this->get_field_id( 'debug_results' ); ?>"><?php _e( 'Show the query results' ); ?></label>
+</p>
+<?php endif;
 	}
 
 	public function update( $new_instance, $old_instance ) {
 		$instance = $old_instance;	
 		$instance['posts_per_page'] = strip_tags( $new_instance['posts_per_page'] );
+		$instance['posts_per_slide'] = strip_tags( $new_instance['posts_per_slide'] );
+		//$instance['view_all_slide'] = strip_tags( $new_instance['view_all_slide'] );
+		$instance['enable_view_all'] = strip_tags( $new_instance['enable_view_all'] );
+		$instance['view_all_text'] = strip_tags( $new_instance['view_all_text'] );
+		$instance['template'] = strip_tags( $new_instance['template'] );
+		$instance['post_type'] = strip_tags( $new_instance['post_type'] );
+		$instance['taxonomy'] = strip_tags( $new_instance['taxonomy'] );
+		$instance['debug_query'] = strip_tags( $new_instance['debug_query'] );
+		$instance['debug_results'] = strip_tags( $new_instance['debug_results'] );
 		$uncategorized_id = get_cat_ID( 'Uncategorized' );
 
 		$cat_args = array(
@@ -164,21 +248,21 @@ class wp_cards_category_carousel_widget extends WP_Widget {
 			'parent'       => 0,
 			'hide_empty'   => 1,
 			'hierarchical' => 0,
-			'taxonomy'     => 'category',
+			'taxonomy'     => strtolower( $instance['taxonomy'] ),
 			'exclude'      => $uncategorized_id
 		);
 
 		$categories = get_categories( $cat_args );
 		foreach( $categories as $category ) {
-			// $instance['exclude'][ $category->term_id ] = ( 'on' == $new_instance['exclude'][ $category->term_id ] ) ? 'yes' : 'no';
-			if ( isset( $new_instance['exclude'][ $category->term_id ] ) ) {
-				$instance['exclude'][ $category->term_id ] = strip_tags( $new_instance['exclude'][ $category->term_id ] );
+			// $instance['include'][ $category->term_id ] = ( 'on' == $new_instance['include'][ $category->term_id ] ) ? 'yes' : 'no';
+			if ( isset( $new_instance['include'][ $category->term_id ] ) ) {
+				$instance['include'][ $category->term_id ] = strip_tags( $new_instance['include'][ $category->term_id ] );
 			} else {
-				$instance['exclude'][ $category->term_id ] = 0;
+				$instance['include'][ $category->term_id ] = 0;
 			}
 		}
 
-		return $instance;
+		return $instance;  
 	}
 }
 
