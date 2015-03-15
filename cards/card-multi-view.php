@@ -23,19 +23,13 @@ class wp_cards_multi_view_widget extends WP_Widget {
 		else
 			$page = 1;
 
-		$include_arr = array();
-		foreach ( $include as $key => $value ) {
-			if ( 'on' === $value ) {
-				$include_arr[] = $key;
-			}
-		}
-
 		// Create a new query instance
 		$query_args = array(
 			'page'             => $page,
 			'posts_per_page'   => $posts_per_page,
 			'suppress_filters' => true,
 			'post_type'        => $post_type,
+			'offset'           => $offset,
 			'orderby'          => $sort_field
 		);
 
@@ -45,6 +39,16 @@ class wp_cards_multi_view_widget extends WP_Widget {
 			//$query_args[ 'meta_query' ] = array();			
 		} else {
 			$query_args[ 'orderby' ] = $sort_field;
+		}
+
+		$include_arr = array();
+
+		if ( ! empty( $include ) ) {
+			foreach ( $include as $key => $value ) {
+				if ( 'on' === $value ) {
+					$include_arr[] = $key;
+				}
+			}
 		}
 
 		if ( ! empty( $include_arr ) ) {
@@ -106,8 +110,9 @@ class wp_cards_multi_view_widget extends WP_Widget {
 			'taxonomy'       => 'category',
 			'sort_field'     => 'date',
 			'sort_direction' => 'DESC',
-			'debug_query'     => '',
-			'debug_results'   => ''
+			'offset'         => '0',
+			'debug_query'    => '',
+			'debug_results'  => ''
 		);
 		$instance = wp_parse_args( (array) $instance, $defaults );
                 
@@ -129,7 +134,8 @@ class wp_cards_multi_view_widget extends WP_Widget {
 			'grid'       => 'Grid', 
 			'tile'       => 'Tile',
 			'mini'       => 'Mini',
-			'spotlight'  => 'Spotlight'
+			'spotlight'  => 'Spotlight',
+			'image'      => 'Image'
 			/*, 
 			'banner'     => 'Banner', 
 			'featurette' => 'Featurette'
@@ -223,6 +229,10 @@ class wp_cards_multi_view_widget extends WP_Widget {
 		<?php endforeach; ?>
 	</select>
 </p>
+<p>
+	<label for="<?php echo $this->get_field_id( 'offset' ); ?>"><?php _e( 'Query Offset', 'wp-cards' ); ?>:</label> 
+	<input type="text" class="widefat" id="<?php echo $this->get_field_id( 'offset' ); ?>" name="<?php echo $this->get_field_name( 'offset' ); ?>" value="<?php echo $instance['offset']; ?>" />
+</p>
 <?php if ( current_user_can( 'manage_options' ) ) : ?>
 <h3><?php _e( 'Debug', 'wp-cards' ); ?></h3>
 <p><small><?php _e( 'Logged in admin users will be able to see output on the screen for debugging purposes.', 'wp-cards' ); ?></small></p>
@@ -248,6 +258,7 @@ class wp_cards_multi_view_widget extends WP_Widget {
 		$instance['sort_field'] = strip_tags( $new_instance['sort_field'] );
 		$instance['sort_direction'] = strip_tags( $new_instance['sort_direction'] );
 		$instance['meta_sort_field'] = strip_tags( $new_instance['meta_sort_field'] );
+		$instance['offset'] = strip_tags( $new_instance['offset'] );
 		$instance['debug_query'] = strip_tags( $new_instance['debug_query'] );
 		$instance['debug_results'] = strip_tags( $new_instance['debug_results'] );
 		$uncategorized_id = get_cat_ID( 'Uncategorized' );

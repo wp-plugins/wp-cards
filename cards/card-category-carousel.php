@@ -23,9 +23,23 @@ class wp_cards_category_carousel_widget extends WP_Widget {
 		);
 
 		$include_arr = array();
-		foreach ( $include as $key => $value ) {
-			if ( 'on' === $value ) {
-				$include_arr[] = $key;
+		if ( is_single() && 'on' == $context_aware_taxonomy ) {
+			global $post;
+			if ( $local_terms = wp_get_post_terms( $post->ID, $taxonomy ) ) {
+				foreach ( $local_terms as $term_key => $term_value ) {
+					$include_arr[] = $term_value->term_id;
+				}
+			} else {
+				// Let the admin know nothing was found and don't output the widget
+				//return;
+			}
+		} else {
+			if ( count( $include ) ) {
+				foreach ( $include as $key => $value ) {
+					if ( 'on' === $value ) {
+						$include_arr[] = $key;
+					}
+				}
 			}
 		}
 
@@ -43,8 +57,14 @@ class wp_cards_category_carousel_widget extends WP_Widget {
 		if ( ! empty ( $args['before_widget'] ) ) {
 			echo $args['before_widget'];
 		}
+
 		?>
-		<div id="<?php echo $args['widget_id']; ?>" class="section carousel category-carousel slide">
+		<style type="text/css">
+			#<?php echo $args['widget_id']; ?> .load-more-toolbar { display:none; }
+			<?php echo $custom_css; ?>
+		</style>
+
+		<div id="<?php echo $args['widget_id']; ?>" class="section carousel category-carousel slide <?php echo ( ! empty( $custom_class ) ) ? $custom_class : '' ?>">
 			<div class="carousel-inner">
 			<?php foreach ( $categories as $category ) :
 				$current_page = 1;
@@ -55,12 +75,20 @@ class wp_cards_category_carousel_widget extends WP_Widget {
 					$number_of_posts = $current_page == $pages ? $posts_per_page - $offset : $posts_per_slide;
 					//echo '<pre>';print_r($number_of_posts);echo '</pre>';
 					// Create a new query instance
+					/*'category__in'     => array( $category->term_id ),*/
 					$query_args = array(
 						'post_type'        => $post_type,
 						'posts_per_page'   => $number_of_posts,
 						'suppress_filters' => true,
-						'category__in'     => array( $category->term_id ),
-						'offset'           => $offset
+						'offset'           => $offset,
+						'tax_query'        => array(
+							array(
+								'taxonomy'   => strtolower( $taxonomy ),
+								'field'      => 'term_id',
+								'terms'      => $category->term_id,
+								'operator'   => 'IN'
+							)
+						)
 					);
 					wp_cards_query( $query_args );
 					global $wp_query;
@@ -84,9 +112,9 @@ class wp_cards_category_carousel_widget extends WP_Widget {
 						echo '<h3>Results:</h3><pre>'; print_r($wp_query->posts); echo '</pre>';
 					}
 					?>
-					<h2 class="section-title ribbon ribbon-highlight"><a href="<?php echo get_category_link( $category->term_id ); ?>"><?php _e( $category->cat_name ); ?></a></h2>
+					<h2 class="section-title ribbon ribbon-highlight"><a href="<?php echo get_term_link( $category, $taxonomy ); ?>"><?php _e( $category->cat_name ); ?></a></h2>
 					<?php if ( 'on' === $enable_view_all ) : ?>
-					<div class="category-view-all"><a href="<?php echo get_category_link( $category->term_id ); ?>"><?php _e( $view_all_text ); ?></a></div>
+					<div class="category-view-all"><a href="<?php echo get_term_link( $category, $taxonomy ); ?>"><?php _e( $view_all_text ); ?></a></div>
 					<?php endif; ?>
 					<div class="entries row <?php echo $template; ?>-view">
 						<?php wp_cards_loop( array( 'view' => $template ) ); ?>
@@ -123,15 +151,18 @@ class wp_cards_category_carousel_widget extends WP_Widget {
 		global $wpdb;
 
 		$defaults = array(
-			'posts_per_page'  => '3',
-			'posts_per_slide' => '3',
-			'template'        => 'tile',
-			'post_type'       => 'post',
-			'taxonomy'        => 'category',
-			'enable_view_all' => 'on',
-			'view_all_text'   => 'View All',
-			'debug_query'     => '',
-			'debug_results'   => ''
+			'posts_per_page'         => '3',
+			'posts_per_slide'        => '3',
+			'template'               => 'tile',
+			'post_type'              => 'post',
+			'taxonomy'               => 'category',
+			'context_aware_taxonomy' => '',
+			'enable_view_all'        => 'on',
+			'view_all_text'          => 'View All',
+			'custom_class'           => '',
+			'custom_css'             => '',
+			'debug_query'            => '',
+			'debug_results'          => ''
 		);
 		$instance = wp_parse_args( (array) $instance, $defaults );
                 
@@ -165,7 +196,8 @@ class wp_cards_category_carousel_widget extends WP_Widget {
 			'grid'       => 'Grid', 
 			'tile'       => 'Tile',
 			'mini'       => 'Mini',
-			'spotlight'  => 'Spotlight'
+			'spotlight'  => 'Spotlight',
+			'image'      => 'Image'
 			/*, 
 			'banner'     => 'Banner', 
 			'featurette' => 'Featurette'
@@ -188,8 +220,21 @@ class wp_cards_category_carousel_widget extends WP_Widget {
 	</select>
 </p>
 <p>
+	<label for="<?php echo $this->get_field_id( 'custom_class' ); ?>"><?php _e( 'Custom Class' ); ?>:</label>
+	<input type="text" class="widefat" id="<?php echo $this->get_field_id( 'custom_class' ); ?>" name="<?php echo $this->get_field_name( 'custom_class' ); ?>" value="<?php echo $instance['custom_class']; ?>" />
+</p>
+<p>
+	<label for="<?php echo $this->get_field_id( 'custom_css' ); ?>"><?php _e( 'Custom CSS' ); ?>:</label>
+	<textarea class="widefat" rows="2" cols="20" id="<?php echo $this->get_field_id( 'custom_css' ); ?>" name="<?php echo $this->get_field_name( 'custom_css' ); ?>"><?php echo $instance['custom_css']; ?></textarea>
+</p>
+<p>
 	<label for="<?php echo $this->get_field_id( 'taxonomy' ); ?>"><?php _e( 'Taxonomy Slug', 'wp-cards' ); ?>:</label> 
 	<input type="text" class="widefat" id="<?php echo $this->get_field_id( 'taxonomy' ); ?>" name="<?php echo $this->get_field_name( 'taxonomy' ); ?>" value="<?php echo $instance['taxonomy']; ?>" />
+</p>
+<p>
+	<input class="checkbox" type="checkbox" <?php checked( (bool) $instance['context_aware_taxonomy'], true ); ?> name="<?php echo $this->get_field_name( 'context_aware_taxonomy' ); ?>" id="<?php echo $this->get_field_id( 'context_aware_taxonomy' ); ?>">
+	<label for="<?php echo $this->get_field_id( 'context_aware_taxonomy' ); ?>"><?php _e( 'Enable "Context Aware" function' ); ?></label>
+	<p><small><?php _e( 'The context aware function is only activated on single post views, it uses the taxonomy from the "Taxonomy Slug" and pull in "Related Posts" based on the current posts categories.', 'wp-cards' ); ?></small></p>
 </p>
 <p>
 	<label><?php _e( 'Include', 'wp-cards' ); ?> <?php echo ucwords(str_replace(array("_","-"), " ", $instance['taxonomy'])); ?>:</label>
@@ -198,7 +243,7 @@ class wp_cards_category_carousel_widget extends WP_Widget {
 	$uncategorized_id = get_cat_ID( 'Uncategorized' );
 
 	$cat_args = array(
-		'type'            => 'post',
+		'type'            => $instance['post_type'],
 		'order'           => 'ASC',
 		'orderby'         => 'name',
 		'parent'          => 0,
@@ -228,7 +273,7 @@ class wp_cards_category_carousel_widget extends WP_Widget {
 	}
 
 	public function update( $new_instance, $old_instance ) {
-		$instance = $old_instance;	
+		$instance = $old_instance;
 		$instance['posts_per_page'] = strip_tags( $new_instance['posts_per_page'] );
 		$instance['posts_per_slide'] = strip_tags( $new_instance['posts_per_slide'] );
 		//$instance['view_all_slide'] = strip_tags( $new_instance['view_all_slide'] );
@@ -237,12 +282,15 @@ class wp_cards_category_carousel_widget extends WP_Widget {
 		$instance['template'] = strip_tags( $new_instance['template'] );
 		$instance['post_type'] = strip_tags( $new_instance['post_type'] );
 		$instance['taxonomy'] = strip_tags( $new_instance['taxonomy'] );
+		$instance['context_aware_taxonomy'] = strip_tags( $new_instance['context_aware_taxonomy'] );
+		$instance['custom_class'] = strip_tags( $new_instance['custom_class'] );
+		$instance['custom_css'] = strip_tags( $new_instance['custom_css'] );
 		$instance['debug_query'] = strip_tags( $new_instance['debug_query'] );
 		$instance['debug_results'] = strip_tags( $new_instance['debug_results'] );
 		$uncategorized_id = get_cat_ID( 'Uncategorized' );
 
 		$cat_args = array(
-			'type'         => 'post',
+			'type'         => $instance['post_type'],
 			'order'        => 'ASC',
 			'orderby'      => 'name',
 			'parent'       => 0,

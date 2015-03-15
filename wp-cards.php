@@ -3,7 +3,7 @@
 Plugin Name: WP Cards
 Plugin URI: http://davidscotttufts.com/wp-cards/
 Description: Allows for theme developers to add "cards" to their theme's homepage and header
-Version: 1.3
+Version: 1.2.1
 Author: David S. Tufts
 Author URI: http://davidscotttufts.com/
 Text Domain: card design
@@ -442,8 +442,8 @@ function wp_cards_get_excerpt( $args = array(), $load = false ) {
 
 function wp_cards_locate_template( $template_names, $load = false, $require_once = true ) {
 	$wp_cards_path = plugin_dir_path( __FILE__ ) . 'templates/';
-	$template_path = get_stylesheet_directory() . '/';
-	$stylesheet_path = get_template_directory() . '/';
+	$stylesheet_path = get_stylesheet_directory() . '/';
+	$template_path = get_template_directory() . '/';
 	$template_file = '';
 
 	foreach ( (array) $template_names as $template_name ) {

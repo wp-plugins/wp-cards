@@ -2,6 +2,20 @@
 
 class wp_cards_jumbotron_search_widget extends WP_Widget {
 	public static $classname = __CLASS__;
+	private $pages = array(
+		'is_404'               => '404 Page',
+		'is_archive'           => 'Archive Page',
+		'is_author'            => 'Author Page',
+		'is_category'          => 'Category Page',
+		'is_front_page'        => 'Front Page',
+		'is_home'              => 'Home Page',
+		'is_page'              => 'Page',
+		'is_post_type_archive' => 'Custom Post Type Archive',
+		'is_search'            => 'Search Page',
+		'is_single'            => 'Single Post or Page',
+		'is_tag'               => 'Tags Page',
+		'is_tax'               => 'Custom Taxonomy Page'
+	);
 	
 	public function __construct() {
 		parent::__construct( __CLASS__, 'Card - Jumbotron for Search', array(
@@ -80,6 +94,9 @@ class wp_cards_jumbotron_search_widget extends WP_Widget {
 <p>
 	<label for="<?php echo $this->get_field_id( 'height' ); ?>"><?php _e( 'Min Height', 'wp-cards' ); ?>:</label> 
 	<input type="text" class="widefat" id="<?php echo $this->get_field_id( 'height' ); ?>" name="<?php echo $this->get_field_name( 'height' ); ?>" value="<?php echo $instance['height']; ?>" />
+</p>
+<p>
+	<label><?php _e( 'Show on Pages', 'wp-cards' ); ?>:</label>
 </p>
 <?php
 	}

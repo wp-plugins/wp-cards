@@ -55,8 +55,8 @@ class wp_cards_jumbotron_banner_widget extends WP_Widget {
 	<input type="text" class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" value="<?php echo $instance['title']; ?>" />
 </p>
 <p>
-	<label for="<?php echo $this->get_field_id( 'text' ); ?>"><?php _e( 'Text' ); ?>:</label> 
-	<input type="text" class="widefat" id="<?php echo $this->get_field_id( 'text' ); ?>" name="<?php echo $this->get_field_name( 'text' ); ?>" value="<?php echo $instance['text']; ?>" />
+	<label for="<?php echo $this->get_field_id( 'text' ); ?>"><?php _e( 'Text' ); ?>:</label>
+	<textarea class="widefat" rows="5" cols="20" id="<?php echo $this->get_field_id( 'text' ); ?>" name="<?php echo $this->get_field_name( 'text' ); ?>"><?php echo $instance['text']; ?></textarea>
 </p>
 <p>
 	<label for="<?php echo $this->get_field_id( 'link_url' ); ?>"><?php _e( 'Link URL' ); ?>:</label> 
@@ -89,7 +89,7 @@ class wp_cards_jumbotron_banner_widget extends WP_Widget {
 		$instance = $old_instance;
 
 		$instance['title'] = strip_tags( $new_instance['title'] );
-		$instance['text'] = strip_tags( $new_instance['text'] );
+		$instance['text'] = $new_instance['text'];
 		$instance['link_url'] = strip_tags( $new_instance['link_url'] );
 		$instance['link_text'] = strip_tags( $new_instance['link_text'] );
 		$instance['reverse_text'] = strip_tags( $new_instance['reverse_text'] );

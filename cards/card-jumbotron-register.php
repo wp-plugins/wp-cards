@@ -2,6 +2,20 @@
 
 class wp_cards_jumbotron_register_widget extends WP_Widget {
 	public static $classname = __CLASS__;
+	private $pages = array(
+		'is_404'               => '404 Page',
+		'is_archive'           => 'Archive Page',
+		'is_author'            => 'Author Page',
+		'is_category'          => 'Category Page',
+		'is_front_page'        => 'Front Page',
+		'is_home'              => 'Home Page',
+		'is_page'              => 'Page',
+		'is_post_type_archive' => 'Custom Post Type Archive',
+		'is_search'            => 'Search Page',
+		'is_single'            => 'Single Post or Page',
+		'is_tag'               => 'Tags Page',
+		'is_tax'               => 'Custom Taxonomy Page'
+	);
 	
 	public function __construct() {
 		parent::__construct( __CLASS__, 'Card - Jumbotron for Registration', array(
@@ -112,7 +126,6 @@ class wp_cards_jumbotron_register_widget extends WP_Widget {
 		$instance = wp_parse_args( (array) $instance, $defaults );
                 
 ?>
-<p><small><?php _e( 'Note: Logged in users will noy be able to see this card, since they are already registered.', 'wp-cards' ); ?></small></p>
 <p>
 	<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title', 'wp-cards' ); ?>:</label> 
 	<input type="text" class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" value="<?php echo $instance['title']; ?>" />
@@ -145,6 +158,9 @@ class wp_cards_jumbotron_register_widget extends WP_Widget {
 <p>
 	<label for="<?php echo $this->get_field_id( 'css' ); ?>"><?php _e( 'Custom CSS', 'wp-cards' ); ?>:</label>
 	<textarea class="widefat" rows="2" cols="20" id="<?php echo $this->get_field_id( 'css' ); ?>" name="<?php echo $this->get_field_name( 'css' ); ?>"><?php echo $instance['css']; ?></textarea>
+</p>
+<p>
+	<label><?php _e( 'Show on Pages', 'wp-cards' ); ?>:</label>
 </p>
 <?php
 	}

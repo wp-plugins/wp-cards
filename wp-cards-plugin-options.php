@@ -12,12 +12,12 @@ $wp_cards_plugin_options = array(
 	'bootstrap_css_cdn'  => array(
 		'type'    => 'text',
 		'id'      => 'wp_cards_bootstrap_css_cdn',
-		'default' => '//netdna.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css'
+		'default' => '//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css'
 	),
 	'bootstrap_js_cdn'  => array(
 		'type'    => 'text',
 		'id'      => 'wp_cards_bootstrap_js_cdn',
-		'default' => '//netdna.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js'
+		'default' => '//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js'
 	)
 );
 
@@ -41,9 +41,9 @@ function wp_cards_plugin_menu() {
 	if ( function_exists( 'current_user_can' ) && ! current_user_can( 'manage_options' ) )
 		return;
 		//die(__('Cheatin&#8217; uh?'));
-		//echo basename( __FILE__ ); die;
-	if ( ! empty( $_REQUEST['page'] ) && esc_attr( 'wp_cards_options' == $_REQUEST['page'] ) ) {
-		$postback_url = '/wp-admin/options-general.php?page=' . esc_attr( $_REQUEST['page'] )
+
+	if ( ! empty( $_REQUEST['page'] ) && esc_attr( $_REQUEST['page'] ) == 'wp_cards_options' ) {
+		$postback_url = '/wp-admin/admin.php?page=' . esc_attr( $_REQUEST['page'] )
 		              . '&on_' . esc_attr( $_REQUEST['action'] ) . '=true';
 
 		if ( ! empty( $_REQUEST['action'] ) && 'save' == esc_attr( $_REQUEST['action'] ) ) {
@@ -74,6 +74,8 @@ function wp_cards_plugin_menu() {
 	}
 
 	add_options_page( 'WP-Cards Options', 'WP-Cards', 'manage_options', 'wp_cards_options', 'wp_cards_options_form' );
+	// add_theme_page( 'WP-Cards Options', 'WP-Cards', 'edit_theme_options', basename(__FILE__), 'wp_cards_options_form' );
+	// add_menu_page( 'WP-Cards', 'WP-Cards', 'manage_options', basename(__FILE__), 'wp_cards_options_form' );
 }
 
 function wp_cards_options_form() {
@@ -99,7 +101,7 @@ function wp_cards_options_form() {
 				<th scope="row"><label for="wp_cards_include_bootstrap_files"><?php _e( 'Include Bootstrap files', 'wp-cards' ); ?></label></th>
 				<td colspan="2">
 					<input id="wp_cards_include_bootstrap_files"<?php echo ( 'enable' == $include_bootstrap_files['value'] ? ' checked="checked"' : '' ); ?> type="checkbox" name="wp_cards_include_bootstrap_files" value="<?php echo $include_bootstrap_files['value']; ?>">
-					<label for="wp_cards_include_bootstrap_files"><?php _e( 'WP-Cards can add Bootstrap to this theme, if the current theme already includes Bootstap, do not check this box.', 'wp-cards' ); ?></label>
+					<label for="wp_cards_include_bootstrap_files"><?php _e( 'WP-Cards can add Bootstrap to the theme, if the current theme already includes Bootstap, do not check this box.', 'wp-cards' ); ?></label>
 				</td>
 			</tr>
 			<tr>
