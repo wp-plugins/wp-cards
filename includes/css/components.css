@@ -119,6 +119,33 @@
 }
 
 /*
+ * Owl Carousel
+ * --------------------------------------------------
+ */
+.owl-carousel {
+	clear:both;
+}
+.owl-controls .owl-nav {
+	position: absolute;
+	top: -36px;
+	right: 5px;
+}
+.owl-prev span, .owl-next span {
+	font-size: 25px;
+	color: #B4B4B3;
+}
+.owl-prev, .owl-next {
+	display: inline-block;
+}
+.owl-prev {
+	margin-right: 5px;
+}
+.owl-theme .owl-controls .owl-nav div {
+	border-radius: 0px;
+	background: transparent;
+}
+
+/*
  * Category Carousel
  * --------------------------------------------------
  */
@@ -156,8 +183,9 @@
 	margin: 0;
 }
 .category-view-all {
-	float: right;
-	margin-right: 85px;
+	position: absolute;
+	right: 85px;
+	top: 0;
 }
 .category-view-all a {
 	font-size:16px;
