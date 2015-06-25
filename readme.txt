@@ -2,7 +2,7 @@
 Contributors: rocketwood
 Tags: cards, card design, widgets
 Requires at least: 3.2
-Tested up to: 4.1
+Tested up to: 4.2.2
 Stable tag: 1.4
 
 WP Cards gives your WordPress website the ability to load "cards" into the homepage and header sections of your site.
