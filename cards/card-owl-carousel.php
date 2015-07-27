@@ -5,7 +5,7 @@ class wp_cards_owl_carousel_widget extends WP_Widget {
 
 	public function __construct() {
 		parent::__construct( __CLASS__, 'Card - Owl Carousel', array(
-			'description' => 'A responsive carousel card that uses the <a href="http://www.owlcarousel.owlgraphic.com/" target="_blank">owl carousel</a> JavaScript library for full width "sidebars" (only shows top level categories).',
+			'description' => 'A responsive carousel card that uses the JavaScript library from owlcarousel.owlgraphic.com for full width "sidebars" (only shows top level categories).',
 			'classname'   => self::$classname
 		) );
 	}

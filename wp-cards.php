@@ -3,7 +3,7 @@
 Plugin Name: WP Cards
 Plugin URI: http://davidscotttufts.com/wp-cards/
 Description: Allows for theme developers to add "cards" to their theme's homepage and header
-Version: 1.4
+Version: 1.5
 Author: David S. Tufts
 Author URI: http://davidscotttufts.com/
 Text Domain: card design
@@ -36,14 +36,15 @@ add_action( 'widgets_init', 'wp_cards_widgets_register');
 add_action( 'admin_menu', 'wp_cards_plugin_menu' );
 
 define( 'WPCARDSPATH', dirname( __FILE__ ) );
-require_once(WPCARDSPATH.'/wp-cards-excerpt.php');
-require_once(WPCARDSPATH.'/wp-cards-plugin-options.php');
+require_once( WPCARDSPATH.'/wp-cards-excerpt.php' );
+require_once( WPCARDSPATH.'/wp-cards-plugin-options.php' );
+require_once( WPCARDSPATH.'/class-page-templater.php' );
 
 /** Run activation when the plugin is activated */
-register_activation_hook(__FILE__, 'wp_cards_activation');
+register_activation_hook( __FILE__, 'wp_cards_activation' );
 
 /** Run deactivation when the plugin is deactivated */
-register_deactivation_hook(__FILE__, 'wp_cards_deactivation');
+register_deactivation_hook( __FILE__, 'wp_cards_deactivation' );
 
 if ( function_exists('register_sidebar') ) {
 	$default_sidebar = array(
@@ -55,8 +56,17 @@ if ( function_exists('register_sidebar') ) {
 		'after_title' => ''
 	);
 	register_sidebar( $default_sidebar );
-	register_sidebar( array_merge( $default_sidebar, array( 'id' => 'header_jumbotron_cards', 'name' => 'Header Jumbotron Cards') ) );
-	register_sidebar( array_merge( $default_sidebar, array( 'id' => 'home_page_cards', 'name' => 'Home Page Cards') ) );
+	register_sidebar( array_merge( $default_sidebar, array( 'id' => 'header_jumbotron_cards', 'name' => 'Header Jumbotron Cards' ) ) );
+	register_sidebar( array_merge( $default_sidebar, array( 'id' => 'home_page_cards', 'name' => 'Home Page Cards' ) ) );
+
+	// Find all pages using the card-template.php
+	$pages = get_pages(array(
+		'meta_key' => '_wp_page_template',
+		'meta_value' => 'wp-cards-template.php'
+	));
+	foreach ( $pages as $page ) {
+		register_sidebar( array_merge( $default_sidebar, array( 'id' => $page->post_name . '-cards', 'name' => $page->post_title . ' Page Cards' ) ) );
+	}
 }
 
 if ( ! is_admin() ) {

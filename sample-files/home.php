@@ -1,9 +1,9 @@
 <?php get_header(); ?>
-<div class="container">
-<?php if ( ! dynamic_sidebar( 'home_page_cards' ) ) : ?>
-<!-- Home Page Cards -->
-<h2>Missing Plugin</h2>
-<p>This theme requires that the WP Cards plugin be installed and activated in order to render the homepage correctly.</p>
-<?php endif; ?>
+<div class="container homepage-container">
+	<div id="content">
+		<?php if ( ! dynamic_sidebar( 'home_page_cards' ) ) : ?>
+			<!-- Homepage Card Area -->
+		<?php endif; ?>
+	</div><!-- /#content -->
 </div><!-- /.container -->
 <?php get_footer(); ?>
