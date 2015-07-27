@@ -18,6 +18,26 @@ $wp_cards_plugin_options = array(
 		'type'    => 'text',
 		'id'      => 'wp_cards_bootstrap_js_cdn',
 		'default' => '//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js'
+	),
+	'page_container_id'  => array(
+		'type'    => 'text',
+		'id'      => 'wp_cards_page_container_id',
+		'default' => 'page-body'
+	),
+	'page_content_id'  => array(
+		'type'    => 'text',
+		'id'      => 'wp_cards_page_content_id',
+		'default' => 'content'
+	),
+	'enable_jumbotron_cards'  => array(
+		'type'    => 'checkbox',
+		'id'      => 'wp_cards_enable_jumbotron_cards',
+		'default' => 'enable'
+	),
+	'enable_header_footer_cards'  => array(
+		'type'    => 'checkbox',
+		'id'      => 'wp_cards_enable_header_footer_cards',
+		'default' => 'enable'
 	)
 );
 
@@ -85,7 +105,7 @@ function wp_cards_options_form() {
 ?>
 <div class="wrap">
 	<div class="icon32" id="icon-themes"><br /></div>
-	<h2><?php _e( 'WP-Cards Plugin Options', 'wp-cards' ); ?></h2>
+	<h2><?php _e( 'WP Cards Plugin Options', 'wp-cards' ); ?></h2>
 	<?php if ( !empty( $_REQUEST['on_save'] ) && esc_attr( $_REQUEST['on_save'] ) ) : ?>
 	<div id="message" class="updated fade"><p><strong><?php _e( 'Plugin settings saved.', 'wp-cards' ); ?></strong></p></div>
 	<?php endif; ?>
@@ -94,14 +114,14 @@ function wp_cards_options_form() {
 		<input type="hidden" name="page" value="<?php echo $current_page; ?>" id="current_module">
 		<div id="edge-mode" class="updated fade">
 			<h3>Bootstrap</h3>
-			<p><?php _e( 'WP-Cards uses Bootstrap\'s CSS and JavaScript files for its responsive layout and rotating carousels.', 'wp-cards' ); ?></p>
+			<p><?php _e( 'WP Cards uses the CSS and JavaScript files from Bootstrap for its responsive layout and rotating carousels.', 'wp-cards' ); ?></p>
 		</div>
 		<table class="form-table">
 			<tr valign="top" class="checkbox">
 				<th scope="row"><label for="wp_cards_include_bootstrap_files"><?php _e( 'Include Bootstrap files', 'wp-cards' ); ?></label></th>
 				<td colspan="2">
 					<input id="wp_cards_include_bootstrap_files"<?php echo ( 'enable' == $include_bootstrap_files['value'] ? ' checked="checked"' : '' ); ?> type="checkbox" name="wp_cards_include_bootstrap_files" value="<?php echo $include_bootstrap_files['value']; ?>">
-					<label for="wp_cards_include_bootstrap_files"><?php _e( 'WP-Cards can add Bootstrap to the theme, if the current theme already includes Bootstap, do not check this box.', 'wp-cards' ); ?></label>
+					<label for="wp_cards_include_bootstrap_files"><?php _e( 'WP Cards can add Bootstrap to the theme, if the current theme already includes Bootstap, do not check this box.', 'wp-cards' ); ?></label>
 				</td>
 			</tr>
 			<tr>
@@ -114,6 +134,32 @@ function wp_cards_options_form() {
 				<th scope="row"><label for="wp_cards_bootstrap_js_cdn"><?php _e( 'Bootstrap CDN Path for JS', 'wp-cards' ); ?></label></th>
 				<td>
 					<input name="wp_cards_bootstrap_js_cdn" type="text" id="wp_cards_bootstrap_js_cdn" value="<?php echo $bootstrap_js_cdn['value']; ?>" class="regular-text code">
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><label for="wp_cards_page_container_id"><?php _e( 'CSS ID for page container', 'wp-cards' ); ?></label></th>
+				<td>
+					<input name="wp_cards_page_container_id" type="text" id="wp_cards_page_container_id" value="<?php echo $page_container_id['value']; ?>" class="regular-text">
+				</td>
+			</tr>
+			<tr>
+				<th scope="row"><label for="wp_cards_page_content_id"><?php _e( 'CSS ID for page content', 'wp-cards' ); ?></label></th>
+				<td>
+					<input name="wp_cards_page_content_id" type="text" id="wp_cards_page_content_id" value="<?php echo $page_content_id['value']; ?>" class="regular-text">
+				</td>
+			</tr>
+			<tr valign="top" class="checkbox">
+				<th scope="row"><label for="wp_cards_enable_jumbotron_cards"><?php _e( 'Enable Jumbotron Cards', 'wp-cards' ); ?></label></th>
+				<td colspan="2">
+					<input id="wp_cards_enable_jumbotron_cards"<?php echo ( 'enable' == $enable_jumbotron_cards['value'] ? ' checked="checked"' : '' ); ?> type="checkbox" name="wp_cards_enable_jumbotron_cards" value="<?php echo $enable_jumbotron_cards['value']; ?>">
+					<label for="wp_cards_enable_jumbotron_cards"><?php _e( 'WP Cards can add a Jumbotron Cards area to pages that use the WP Cards Template, this will also add the corresponding widget area to the website admin.', 'wp-cards' ); ?></label>
+				</td>
+			</tr>
+			<tr valign="top" class="checkbox">
+				<th scope="row"><label for="wp_cards_enable_header_footer_cards"><?php _e( 'Enable Header/Footer Cards', 'wp-cards' ); ?></label></th>
+				<td colspan="2">
+					<input id="wp_cards_enable_header_footer_cards"<?php echo ( 'enable' == $enable_header_footer_cards['value'] ? ' checked="checked"' : '' ); ?> type="checkbox" name="wp_cards_enable_header_footer_cards" value="<?php echo $enable_header_footer_cards['value']; ?>">
+					<label for="wp_cards_enable_header_footer_cards"><?php _e( 'WP Cards can add header and footer card areas to pages that use the WP Cards Template, this will also add the corresponding widget areas to the website admin.', 'wp-cards' ); ?></label>
 				</td>
 			</tr>
 		</table>

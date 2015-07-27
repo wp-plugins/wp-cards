@@ -7,7 +7,7 @@
  *
  */
 
-class PageTemplater {
+class WPCardsPageTemplate {
 
 		/**
          * A Unique Identifier
@@ -31,7 +31,7 @@ class PageTemplater {
         public static function get_instance() {
 
                 if( null == self::$instance ) {
-                        self::$instance = new PageTemplater();
+                        self::$instance = new WPCardsPageTemplate();
                 } 
 
                 return self::$instance;
@@ -142,6 +142,6 @@ class PageTemplater {
 
 } 
 
-add_action( 'plugins_loaded', array( 'PageTemplater', 'get_instance' ) );
+add_action( 'plugins_loaded', array( 'WPCardsPageTemplate', 'get_instance' ) );
 
 ?>

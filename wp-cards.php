@@ -3,7 +3,7 @@
 Plugin Name: WP Cards
 Plugin URI: http://davidscotttufts.com/wp-cards/
 Description: Allows for theme developers to add "cards" to their theme's homepage and header
-Version: 1.5
+Version: 1.5.1
 Author: David S. Tufts
 Author URI: http://davidscotttufts.com/
 Text Domain: card design
@@ -56,7 +56,13 @@ if ( function_exists('register_sidebar') ) {
 		'after_title' => ''
 	);
 	register_sidebar( $default_sidebar );
-	register_sidebar( array_merge( $default_sidebar, array( 'id' => 'header_jumbotron_cards', 'name' => 'Header Jumbotron Cards' ) ) );
+	if ( 'enable' == $wp_cards_plugin_options['enable_jumbotron_cards']['value'] ) {
+		register_sidebar( array_merge( $default_sidebar, array( 'id' => 'jumbotron-cards', 'name' => 'Jumbotron Cards' ) ) );
+	}
+	if ( 'enable' == $wp_cards_plugin_options['enable_header_footer_cards']['value'] ) {
+		register_sidebar( array_merge( $default_sidebar, array( 'id' => 'header-cards', 'name' => 'Header Cards' ) ) );
+		register_sidebar( array_merge( $default_sidebar, array( 'id' => 'footer-cards', 'name' => 'Footer Cards' ) ) );
+	}
 	register_sidebar( array_merge( $default_sidebar, array( 'id' => 'home_page_cards', 'name' => 'Home Page Cards' ) ) );
 
 	// Find all pages using the card-template.php
